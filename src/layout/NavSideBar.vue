@@ -2,7 +2,7 @@
   <nav class="pc-sidebar">
     <div class="navbar-wrapper">
       <div class="m-header">
-        <a href="../dashboard/index.html" class="b-brand text-primary">
+        <router-link to="/" class="b-brand text-primary">
           <!-- ========   Change your logo from here   ============ -->
           <img
             src="../assets/imagens/logotipo.png"
@@ -10,101 +10,105 @@
             alt="logo"
             style="max-width: 90px; height: auto"
           />
-        </a>
+        </router-link>
       </div>
       <div class="navbar-content">
         <ul class="pc-navbar">
           <li class="pc-item">
-            <a href="../dashboard/index.html" class="pc-link">
+            <router-link to="/" class="pc-link">
               <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
               <span class="pc-mtext">HABEIS EDUCACIONAL</span>
-            </a>
+            </router-link>
+          </li>
+
+          <!-- Certificados -->
+          <li class="pc-item">
+            <router-link to="/certificados" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-certificate"></i></span>
+              <span class="pc-mtext">Certificados</span>
+            </router-link>
           </li>
 
           <li class="pc-item pc-caption">
-            <label>UI Components</label>
-            <i class="ti ti-dashboard"></i>
+            <label>Gerenciamento</label>
+            <i class="ti ti-settings"></i>
           </li>
           <li class="pc-item">
-            <a href="../elements/bc_typography.html" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-typography"></i></span>
-              <span class="pc-mtext">Typography</span>
-            </a>
+            <router-link to="/cursos" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-book"></i></span>
+              <span class="pc-mtext">Cursos</span>
+            </router-link>
           </li>
           <li class="pc-item">
-            <a href="../elements/bc_color.html" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-color-swatch"></i></span>
-              <span class="pc-mtext">Color</span>
-            </a>
+            <router-link to="/alunos" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-users"></i></span>
+              <span class="pc-mtext">Alunos</span>
+            </router-link>
           </li>
           <li class="pc-item">
-            <a href="../elements/icon-tabler.html" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-plant-2"></i></span>
-              <span class="pc-mtext">Icons</span>
-            </a>
+            <router-link to="/professores" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-user-star"></i></span>
+              <span class="pc-mtext">Professores</span>
+            </router-link>
           </li>
 
           <li class="pc-item pc-caption">
-            <label>Pages</label>
-            <i class="ti ti-news"></i>
+            <label>Sistema</label>
+            <i class="ti ti-apps"></i>
           </li>
           <li class="pc-item">
-            <a href="../pages/login.html" class="pc-link">
+            <router-link to="/login" class="pc-link">
               <span class="pc-micon"><i class="ti ti-lock"></i></span>
               <span class="pc-mtext">Login</span>
-            </a>
+            </router-link>
           </li>
           <li class="pc-item">
-            <a href="../pages/register.html" class="pc-link">
+            <router-link to="/registro" class="pc-link">
               <span class="pc-micon"><i class="ti ti-user-plus"></i></span>
-              <span class="pc-mtext">Register</span>
-            </a>
+              <span class="pc-mtext">Cadastro</span>
+            </router-link>
           </li>
 
           <li class="pc-item pc-caption">
-            <label>Other</label>
-            <i class="ti ti-brand-chrome"></i>
+            <label>Relatórios</label>
+            <i class="ti ti-chart-bar"></i>
           </li>
           <li class="pc-item pc-hasmenu">
             <a href="#!" class="pc-link"
-              ><span class="pc-micon"><i class="ti ti-menu"></i></span
-              ><span class="pc-mtext">Menu levels</span
+              ><span class="pc-micon"><i class="ti ti-report"></i></span
+              ><span class="pc-mtext">Estatísticas</span
               ><span class="pc-arrow"><i data-feather="chevron-right"></i></span
             ></a>
             <ul class="pc-submenu">
-              <li class="pc-item"><a class="pc-link" href="#!">Level 2.1</a></li>
-              <li class="pc-item pc-hasmenu">
-                <a href="#!" class="pc-link"
-                  >Level 2.2<span class="pc-arrow"><i data-feather="chevron-right"></i></span
-                ></a>
-                <ul class="pc-submenu">
-                  <li class="pc-item"><a class="pc-link" href="#!">Level 3.1</a></li>
-                  <li class="pc-item"><a class="pc-link" href="#!">Level 3.2</a></li>
-                  <li class="pc-item pc-hasmenu">
-                    <a href="#!" class="pc-link"
-                      >Level 3.3<span class="pc-arrow"><i data-feather="chevron-right"></i></span
-                    ></a>
-                    <ul class="pc-submenu">
-                      <li class="pc-item"><a class="pc-link" href="#!">Level 4.1</a></li>
-                      <li class="pc-item"><a class="pc-link" href="#!">Level 4.2</a></li>
-                    </ul>
-                  </li>
-                </ul>
+              <li class="pc-item">
+                <router-link class="pc-link" to="/relatorios/emissoes">Emissões</router-link>
               </li>
               <li class="pc-item pc-hasmenu">
                 <a href="#!" class="pc-link"
-                  >Level 2.3<span class="pc-arrow"><i data-feather="chevron-right"></i></span
+                  >Participação<span class="pc-arrow"><i data-feather="chevron-right"></i></span
                 ></a>
                 <ul class="pc-submenu">
-                  <li class="pc-item"><a class="pc-link" href="#!">Level 3.1</a></li>
-                  <li class="pc-item"><a class="pc-link" href="#!">Level 3.2</a></li>
+                  <li class="pc-item">
+                    <router-link class="pc-link" to="/relatorios/alunos">Por Aluno</router-link>
+                  </li>
+                  <li class="pc-item">
+                    <router-link class="pc-link" to="/relatorios/cursos">Por Curso</router-link>
+                  </li>
                   <li class="pc-item pc-hasmenu">
                     <a href="#!" class="pc-link"
-                      >Level 3.3<span class="pc-arrow"><i data-feather="chevron-right"></i></span
+                      >Desempenho<span class="pc-arrow"><i data-feather="chevron-right"></i></span
                     ></a>
                     <ul class="pc-submenu">
-                      <li class="pc-item"><a class="pc-link" href="#!">Level 4.1</a></li>
-                      <li class="pc-item"><a class="pc-link" href="#!">Level 4.2</a></li>
+                      <li class="pc-item">
+                        <router-link class="pc-link" to="/relatorios/desempenho/mensal"
+                          >Mensal</router-link
+                        >
+                      </li>
+                      <li class="pc-item">
+                        <router-link class="pc-link" to="/relatorios/desempenho/anual"
+                          >Anual</router-link
+                        >
+                      </li>
                     </ul>
                   </li>
                 </ul>
@@ -112,30 +116,12 @@
             </ul>
           </li>
           <li class="pc-item">
-            <a href="../other/sample-page.html" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-brand-chrome"></i></span>
-              <span class="pc-mtext">Sample page</span>
-            </a>
+            <router-link to="/configuracoes" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-settings"></i></span>
+              <span class="pc-mtext">Configurações</span>
+            </router-link>
           </li>
         </ul>
-        <div class="card text-center">
-          <div class="card-body">
-            <img
-              src="../assets/imagens/logotipo.png"
-              alt="images"
-              class="img-fluid mb-2"
-              style="max-width: 70px; height: auto"
-            />
-            <h5>Upgrade To Pro</h5>
-            <p>To get more features and components</p>
-            <a
-              href="https://codedthemes.com/item/berry-bootstrap-5-admin-template/"
-              target="_blank"
-              class="btn btn-success"
-              >Buy Now</a
-            >
-          </div>
-        </div>
       </div>
     </div>
   </nav>
@@ -143,8 +129,12 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { RouterLink } from 'vue-router'
 
 export default defineComponent({
   name: 'NavSideBar',
+  components: {
+    RouterLink,
+  },
 })
 </script>
