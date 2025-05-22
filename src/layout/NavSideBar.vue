@@ -22,11 +22,20 @@
           </li>
 
           <!-- Certificados -->
-          <li class="pc-item">
+          <li class="pc-item pc-hasmenu">
             <router-link to="/certificados" class="pc-link">
               <span class="pc-micon"><i class="ti ti-certificate"></i></span>
               <span class="pc-mtext">Certificados</span>
+              <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
             </router-link>
+            <ul class="pc-submenu">
+              <li class="pc-item">
+                <router-link class="pc-link" to="/certificados">Meus Certificados</router-link>
+              </li>
+              <li class="pc-item">
+                <router-link class="pc-link" to="/certificados/validar">Validar Certificado</router-link>
+              </li>
+            </ul>
           </li>
 
           <li class="pc-item pc-caption">
