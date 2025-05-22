@@ -48,15 +48,8 @@ npm run dev
 npm run build
 ```
 
-### Lint com ESLint
-
-```sh
-npm run lint
-```
-
 ## Próximos Passos
 
 - Implementação da autenticação de usuários
-- Desenvolvimento da API de backend
 - Implementação do sistema de pagamentos
 - Integração com sistema de emissão de certificados digitais
