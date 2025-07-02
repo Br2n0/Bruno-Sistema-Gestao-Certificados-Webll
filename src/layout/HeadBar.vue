@@ -242,10 +242,11 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 const termoBusca = ref('');
 
-// Dados do usuário (simulados por enquanto)
-// Em uma aplicação real, esses dados viriam de um estado global ou API
-const userName = ref('Usuário Demo');
-const userEmail = ref('usuario@exemplo.com');
+// Usa o sistema de autenticação
+const { currentUser, logout: authLogout, isAuthenticated, isAdmin } = useAuth();
+
+// Usa o sistema de sidebar
+const { toggleSidebar } = useSidebar();
 
 // Método para realizar a busca
 const realizarBusca = () => {

@@ -575,7 +575,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router';
 
 // Aba ativa nas configurações
@@ -756,6 +756,30 @@ const salvarPrivacidade = () => {
 
 // Simula o salvamento das configurações de aparência
 const salvarAparencia = () => {
+  // Aplica o tema escuro/claro de forma simples
+  const html = document.documentElement;
+  const body = document.body;
+  
+  if (config.aparencia.tema === 'escuro') {
+    html.classList.add('dark-theme');
+    body.classList.add('dark-theme');
+  } else if (config.aparencia.tema === 'claro') {
+    html.classList.remove('dark-theme');
+    body.classList.remove('dark-theme');
+  } else if (config.aparencia.tema === 'sistema') {
+    const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (isDark) {
+      html.classList.add('dark-theme');
+      body.classList.add('dark-theme');
+    } else {
+      html.classList.remove('dark-theme');
+      body.classList.remove('dark-theme');
+    }
+  }
+  
+  // Salva a preferência
+  localStorage.setItem('theme-preference', config.aparencia.tema);
+  
   setTimeout(() => {
     // Em uma aplicação real, aplicaríamos o tema, tamanho da fonte, etc.
     mostrarMensagem('Aparência personalizada aplicada!');
@@ -887,5 +911,52 @@ const mostrarMensagem = (mensagem: string) => {
 .form-check-input:checked {
   background-color: #1976d2;
   border-color: #1976d2;
+}
+
+/* Estilos básicos para tema escuro */
+:global(.dark-theme) {
+  background-color: #121212 !important;
+  color: #e0e0e0 !important;
+}
+
+:global(.dark-theme .card) {
+  background-color: #1e1e1e !important;
+  border-color: #424242 !important;
+  color: #e0e0e0 !important;
+}
+
+:global(.dark-theme .form-control) {
+  background-color: #2d2d2d !important;
+  border-color: #424242 !important;
+  color: #e0e0e0 !important;
+}
+
+:global(.dark-theme .form-control::placeholder) {
+  color: #888888 !important;
+}
+
+:global(.dark-theme .btn-outline-secondary) {
+  color: #e0e0e0 !important;
+  border-color: #424242 !important;
+}
+
+:global(.dark-theme .nav-tabs .nav-link) {
+  color: #b0b0b0 !important;
+}
+
+:global(.dark-theme .nav-tabs .nav-link.active) {
+  color: #2196f3 !important;
+}
+
+:global(.dark-theme .text-muted) {
+  color: #888888 !important;
+}
+
+:global(.dark-theme .pc-container) {
+  background-color: #121212 !important;
+}
+
+:global(.dark-theme .pc-content) {
+  background-color: #121212 !important;
 }
 </style> 

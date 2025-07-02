@@ -5,8 +5,6 @@ import './assets/fonts/material.css'
 import './assets/css/style-preset.css'
 import './assets/css/style.css'
 
-
-
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'

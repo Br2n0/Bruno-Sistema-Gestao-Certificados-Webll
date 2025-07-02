@@ -1,149 +1,164 @@
 <template>
-  <nav class="pc-sidebar">
+  <nav class="pc-sidebar" :class="sidebarClass">
     <div class="navbar-wrapper">
+      <!-- Logo da empresa -->
       <div class="m-header">
         <router-link to="/" class="b-brand text-primary">
-          <!-- ========   Change your logo from here   ============ -->
           <img
             src="../assets/imagens/logotipo.png"
             class="img-fluid logo-lg"
-            alt="logo"
+            alt="Hábeis Educacional"
             style="max-width: 90px; height: auto"
           />
         </router-link>
       </div>
+      
       <div class="navbar-content">
         <ul class="pc-navbar">
+          <!-- 🏠 Página Inicial -->
           <li class="pc-item">
             <router-link to="/" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
-              <span class="pc-mtext">HABEIS EDUCACIONAL</span>
+              <span class="pc-micon"><i class="ti ti-home"></i></span>
+              <span class="pc-mtext">Início</span>
             </router-link>
           </li>
 
-          <!-- Certificados -->
+          <!-- 🎓 Seção de Cursos -->
           <li class="pc-item pc-hasmenu">
-            <router-link to="/certificados" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-certificate"></i></span>
-              <span class="pc-mtext">Certificados</span>
+            <router-link to="/cursos" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-book"></i></span>
+              <span class="pc-mtext">Cursos</span>
               <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
             </router-link>
             <ul class="pc-submenu">
               <li class="pc-item">
-                <router-link class="pc-link" to="/certificados">Meus Certificados</router-link>
+                <router-link class="pc-link" to="/cursos">📋 Catálogo de Cursos</router-link>
               </li>
               <li class="pc-item">
-                <router-link class="pc-link" to="/certificados/validar">Validar Certificado</router-link>
+                <router-link class="pc-link" to="/cursos/buscar">🔍 Buscar Cursos</router-link>
+              </li>
+              <!-- Só aparece para usuários logados -->
+              <li v-if="isAuthenticated" class="pc-item">
+                <router-link class="pc-link" to="/cursos/meus-cursos">📚 Meus Cursos</router-link>
               </li>
             </ul>
           </li>
 
-          <li class="pc-item pc-caption">
-            <label>Gerenciamento</label>
-            <i class="ti ti-settings"></i>
-          </li>
-          <li class="pc-item">
-            <router-link to="/cursos" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-book"></i></span>
-              <span class="pc-mtext">Cursos</span>
+          <!-- 📜 Certificados (só para usuários logados) -->
+          <li v-if="isAuthenticated" class="pc-item pc-hasmenu">
+            <router-link to="/certificados" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-certificate"></i></span>
+              <span class="pc-mtext">Meus Certificados</span>
+              <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
             </router-link>
-          </li>
-          <li class="pc-item">
-            <router-link to="/alunos" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-users"></i></span>
-              <span class="pc-mtext">Alunos</span>
-            </router-link>
-          </li>
-          <li class="pc-item">
-            <router-link to="/professores" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-user-star"></i></span>
-              <span class="pc-mtext">Professores</span>
-            </router-link>
-          </li>
-
-          <li class="pc-item pc-caption">
-            <label>Sistema</label>
-            <i class="ti ti-apps"></i>
-          </li>
-          <li class="pc-item">
-            <router-link to="/login" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-lock"></i></span>
-              <span class="pc-mtext">Login</span>
-            </router-link>
-          </li>
-          <li class="pc-item">
-            <router-link to="/registro" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-user-plus"></i></span>
-              <span class="pc-mtext">Cadastro</span>
-            </router-link>
-          </li>
-
-          <li class="pc-item pc-caption">
-            <label>Relatórios</label>
-            <i class="ti ti-chart-bar"></i>
-          </li>
-          <li class="pc-item pc-hasmenu">
-            <a href="#!" class="pc-link"
-              ><span class="pc-micon"><i class="ti ti-report"></i></span
-              ><span class="pc-mtext">Estatísticas</span
-              ><span class="pc-arrow"><i data-feather="chevron-right"></i></span
-            ></a>
             <ul class="pc-submenu">
               <li class="pc-item">
-                <router-link class="pc-link" to="/relatorios/emissoes">Emissões</router-link>
+                <router-link class="pc-link" to="/certificados">✅ Certificados Conquistados</router-link>
               </li>
-              <li class="pc-item pc-hasmenu">
-                <a href="#!" class="pc-link"
-                  >Participação<span class="pc-arrow"><i data-feather="chevron-right"></i></span
-                ></a>
-                <ul class="pc-submenu">
-                  <li class="pc-item">
-                    <router-link class="pc-link" to="/relatorios/alunos">Por Aluno</router-link>
-                  </li>
-                  <li class="pc-item">
-                    <router-link class="pc-link" to="/relatorios/cursos">Por Curso</router-link>
-                  </li>
-                  <li class="pc-item pc-hasmenu">
-                    <a href="#!" class="pc-link"
-                      >Desempenho<span class="pc-arrow"><i data-feather="chevron-right"></i></span
-                    ></a>
-                    <ul class="pc-submenu">
-                      <li class="pc-item">
-                        <router-link class="pc-link" to="/relatorios/desempenho/mensal"
-                          >Mensal</router-link
-                        >
-                      </li>
-                      <li class="pc-item">
-                        <router-link class="pc-link" to="/relatorios/desempenho/anual"
-                          >Anual</router-link
-                        >
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+              <li class="pc-item">
+                <router-link class="pc-link" to="/certificados/andamento">⏳ Cursos em Andamento</router-link>
+              </li>
+              <li class="pc-item">
+                <router-link class="pc-link" to="/certificados/progresso">📈 Meu Progresso</router-link>
               </li>
             </ul>
           </li>
-          <li class="pc-item">
+
+          <!-- ⚙️ Configurações Pessoais (só para usuários logados) -->
+          <li v-if="isAuthenticated" class="pc-item pc-hasmenu">
             <router-link to="/configuracoes" class="pc-link">
               <span class="pc-micon"><i class="ti ti-settings"></i></span>
               <span class="pc-mtext">Configurações</span>
+              <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
             </router-link>
+            <ul class="pc-submenu">
+              <li class="pc-item">
+                <router-link class="pc-link" to="/configuracoes/perfil">👤 Meu Perfil</router-link>
+              </li>
+              <li class="pc-item">
+                <router-link class="pc-link" to="/configuracoes/notificacoes">🔔 Notificações</router-link>
+              </li>
+              <li class="pc-item">
+                <router-link class="pc-link" to="/configuracoes/seguranca">🔐 Segurança</router-link>
+              </li>
+            </ul>
           </li>
+
+          <!-- 🛡️ SEÇÃO ADMINISTRATIVA (só para administradores) -->
+          <template v-if="isAdmin">
+            <li class="pc-item pc-caption">
+              <label>🛡️ Administração</label>
+              <i class="ti ti-shield"></i>
+            </li>
+            
+            <li class="pc-item">
+              <router-link to="/admin/usuarios" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-users"></i></span>
+                <span class="pc-mtext">👥 Gestão de Usuários</span>
+              </router-link>
+            </li>
+            
+            <li class="pc-item">
+              <router-link to="/admin/cursos" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-book-2"></i></span>
+                <span class="pc-mtext">🎓 Gestão de Cursos</span>
+              </router-link>
+            </li>
+            
+            <li class="pc-item">
+              <router-link to="/admin/professores" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-user-star"></i></span>
+                <span class="pc-mtext">👨‍🏫 Gestão de Professores</span>
+              </router-link>
+            </li>
+            
+            <li class="pc-item">
+              <router-link to="/admin/certificados" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-certificate-2"></i></span>
+                <span class="pc-mtext">📜 Gestão de Certificados</span>
+              </router-link>
+            </li>
+            
+            <li class="pc-item">
+              <router-link to="/admin/configuracoes" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-settings-cog"></i></span>
+                <span class="pc-mtext">⚙️ Configurações do Sistema</span>
+              </router-link>
+            </li>
+          </template>
+
+          <!-- 🔐 Autenticação (só para usuários não logados) -->
+          <template v-if="!isAuthenticated">
+            <li class="pc-item pc-caption">
+              <label>Acesso</label>
+              <i class="ti ti-lock"></i>
+            </li>
+            <li class="pc-item">
+              <router-link to="/login" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-login"></i></span>
+                <span class="pc-mtext">Entrar</span>
+              </router-link>
+            </li>
+            <li class="pc-item">
+              <router-link to="/registro" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-user-plus"></i></span>
+                <span class="pc-mtext">Criar Conta</span>
+              </router-link>
+            </li>
+          </template>
         </ul>
       </div>
     </div>
   </nav>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-import { RouterLink } from 'vue-router'
+<script setup lang="ts">
+import { useAuth } from '@/composables/useAuth'
+import { useSidebar } from '@/composables/useSidebar'
 
-export default defineComponent({
-  name: 'NavSideBar',
-  components: {
-    RouterLink,
-  },
-})
+// Importa as funções de autenticação
+const { isAdmin, isAuthenticated } = useAuth()
+
+// Importa as funções da sidebar
+const { sidebarClass } = useSidebar()
 </script>
