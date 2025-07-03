@@ -1,17 +1,17 @@
 <template>
-<header class="pc-header">
+<header class="pc-header" :class="{ 'sidebar-collapsed': isCollapsed && !isMobile }">
   <div class="header-wrapper"> 
     <!-- [Mobile Media Block] start -->
     <div class="me-auto pc-mob-drp">
       <ul class="list-unstyled">
         <!-- ======= Menu collapse Icon ===== -->
         <li class="pc-h-item pc-sidebar-collapse">
-          <a href="#" class="pc-head-link ms-0" id="sidebar-hide">
+          <a href="#" class="pc-head-link ms-0" @click.prevent="toggleSidebar">
             <i class="ti ti-menu-2"></i>
           </a>
         </li>
         <li class="pc-h-item pc-sidebar-popup">
-          <a href="#" class="pc-head-link ms-0" id="mobile-collapse">
+          <a href="#" class="pc-head-link ms-0" @click.prevent="toggleSidebar">
             <i class="ti ti-menu-2"></i>
           </a>
         </li>
@@ -64,171 +64,93 @@
     <!-- [Right Side Menu] -->
     <div class="ms-auto">
       <ul class="list-unstyled">
-        <!-- Notificações -->
-        <li class="dropdown pc-h-item">
-          <a
-            class="pc-head-link dropdown-toggle arrow-none me-0"
-            data-bs-toggle="dropdown"
-            href="#"
-            role="button"
-            aria-haspopup="false"
-            aria-expanded="false"
-          >
-            <i class="ti ti-bell"></i>
-            <span class="badge bg-danger pc-h-badge">3</span>
-          </a>
-          <div class="dropdown-menu dropdown-notification dropdown-menu-end pc-h-dropdown">
-            <div class="dropdown-header d-flex align-items-center justify-content-between">
-              <h5 class="m-0">Notificações</h5>
-              <a href="#!" class="pc-head-link bg-transparent"><i class="ti ti-x text-danger"></i></a>
+        <!-- Quando usuário NÃO está logado - mostrar Entrar/Criar Conta -->
+        <template v-if="!isAuthenticated">
+          <li class="pc-h-item d-flex align-items-center">
+            <div class="auth-buttons-container">
+              <router-link 
+                to="/login" 
+                class="btn-entrar me-2"
+              >
+                <i class="ti ti-login me-2"></i>
+                Entrar
+              </router-link>
+              <router-link 
+                to="/registro" 
+                class="btn-cadastrar"
+              >
+                <i class="ti ti-user-plus me-2"></i>
+                Criar Conta
+              </router-link>
             </div>
-            <div class="dropdown-divider"></div>
-            <div class="dropdown-header px-0 text-wrap header-notification-scroll position-relative" style="max-height: calc(100vh - 215px)">
-              <div class="list-group list-group-flush w-100">
-                <a class="list-group-item list-group-item-action">
-                  <div class="d-flex">
-                    <div class="flex-shrink-0">
-                      <i class="ti ti-certificate bg-light text-primary p-2 rounded"></i>
-                    </div>
-                    <div class="flex-grow-1 ms-3">
-                      <span class="float-end text-muted">Agora</span>
-                      <p class="text-body mb-1">Seu certificado foi emitido!</p>
-                      <span class="text-muted">Curso de HTML5 e CSS3</span>
-                    </div>
-                  </div>
-                </a>
-                <a class="list-group-item list-group-item-action">
-                  <div class="d-flex">
-                    <div class="flex-shrink-0">
-                      <i class="ti ti-clock bg-light text-warning p-2 rounded"></i>
-                    </div>
-                    <div class="flex-grow-1 ms-3">
-                      <span class="float-end text-muted">2 horas atrás</span>
-                      <p class="text-body mb-1">Lembrete de curso agendado</p>
-                      <span class="text-muted">JavaScript Avançado</span>
-                    </div>
-                  </div>
-                </a>
-                <a class="list-group-item list-group-item-action">
-                  <div class="d-flex">
-                    <div class="flex-shrink-0">
-                      <i class="ti ti-message-circle bg-light text-success p-2 rounded"></i>
-                    </div>
-                    <div class="flex-grow-1 ms-3">
-                      <span class="float-end text-muted">Ontem</span>
-                      <p class="text-body mb-1">Novo comentário em seu certificado</p>
-                      <span class="text-muted">Administrador</span>
-                    </div>
-                  </div>
-                </a>
+          </li>
+        </template>
+
+        <!-- Quando usuário ESTÁ logado - mostrar Notificações/Minha Conta -->
+        <template v-else>
+          <!-- Notificações -->
+          <li class="dropdown pc-h-item">
+            <a
+              class="pc-head-link dropdown-toggle arrow-none me-0"
+              href="#"
+              role="button"
+              aria-haspopup="false"
+              aria-expanded="false"
+            >
+              <i class="ti ti-bell"></i>
+            </a>
+          </li>
+          
+          <!-- Perfil do Usuário -->
+          <li class="dropdown pc-h-item header-user-profile" ref="dropdownRef">
+            <a
+              class="pc-head-link dropdown-toggle arrow-none me-0"
+              href="#"
+              role="button"
+              aria-haspopup="false"
+              :aria-expanded="isDropdownOpen"
+              @click.prevent="toggleDropdown"
+            >
+              <div class="user-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                <span>{{ getUserInitials().charAt(0) }}</span>
               </div>
-            </div>
-            <div class="dropdown-divider"></div>
-            <div class="text-center py-2">
-              <a href="#!" class="link-primary">Ver todas as notificações</a>
-            </div>
-          </div>
-        </li>
-        
-        <!-- Perfil do Usuário -->
-        <li class="dropdown pc-h-item header-user-profile">
-          <a
-            class="pc-head-link dropdown-toggle arrow-none me-0"
-            data-bs-toggle="dropdown"
-            href="#"
-            role="button"
-            aria-haspopup="false"
-            data-bs-auto-close="outside"
-            aria-expanded="false"
-          >
-            <img src="../assets/imagens/logotipo.png" alt="user-image" class="user-avtar" style="object-fit: cover;">
-            <span>Minha Conta</span>
-          </a>
-          <div class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown">
-            <div class="dropdown-header">
-              <div class="d-flex mb-1">
-                <div class="flex-shrink-0">
-                  <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
-                    <span>{{ getUserInitials() }}</span>
+              <span>Minha Conta</span>
+            </a>
+            <div 
+              class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown" 
+              :class="{ 'show': isDropdownOpen }"
+            >
+              <div class="dropdown-header">
+                <div class="d-flex mb-1">
+                  <div class="flex-shrink-0">
+                    <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                      <span>{{ getUserInitials().charAt(0) }}</span>
+                    </div>
+                  </div>
+                  <div class="flex-grow-1 ms-3">
+                    <h6 class="mb-1">{{ currentUser?.nome || 'Usuário' }}</h6>
+                    <span>{{ currentUser?.email || 'email@exemplo.com' }}</span>
                   </div>
                 </div>
-                <div class="flex-grow-1 ms-3">
-                  <h6 class="mb-1">{{ userName }}</h6>
-                  <span>{{ userEmail }}</span>
-                </div>
-                <a href="#!" class="pc-head-link bg-transparent" @click="logout"><i class="ti ti-power text-danger"></i></a>
               </div>
+              <div class="dropdown-divider"></div>
+              <router-link to="/configuracoes" class="dropdown-item" @click="closeDropdown">
+                <i class="ti ti-settings"></i>
+                <span>Configurações</span>
+              </router-link>
+              <div class="dropdown-divider"></div>
+              <a href="#!" class="dropdown-item text-danger" @click="logout">
+                <i class="ti ti-power"></i>
+                <span>Sair da conta</span>
+              </a>
+              <div class="dropdown-divider"></div>
+              <small class="dropdown-item-text text-muted">
+                <i class="ti ti-info-circle me-1"></i>
+                Faça logout para ver os botões de login
+              </small>
             </div>
-            <ul class="nav drp-tabs nav-fill nav-tabs" id="mydrpTab" role="tablist">
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link active"
-                  id="drp-t1"
-                  data-bs-toggle="tab"
-                  data-bs-target="#drp-tab-1"
-                  type="button"
-                  role="tab"
-                  aria-controls="drp-tab-1"
-                  aria-selected="true"
-                ><i class="ti ti-user"></i> Perfil</button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link"
-                  id="drp-t2"
-                  data-bs-toggle="tab"
-                  data-bs-target="#drp-tab-2"
-                  type="button"
-                  role="tab"
-                  aria-controls="drp-tab-2"
-                  aria-selected="false"
-                ><i class="ti ti-settings"></i> Configurações</button>
-              </li>
-            </ul>
-            <div class="tab-content" id="mysrpTabContent">
-              <div class="tab-pane fade show active" id="drp-tab-1" role="tabpanel" aria-labelledby="drp-t1" tabindex="0">
-                <router-link to="/perfil/editar" class="dropdown-item">
-                  <i class="ti ti-edit-circle"></i>
-                  <span>Editar Perfil</span>
-                </router-link>
-                <router-link to="/perfil" class="dropdown-item">
-                  <i class="ti ti-user"></i>
-                  <span>Meu Perfil</span>
-                </router-link>
-                <router-link to="/certificados" class="dropdown-item">
-                  <i class="ti ti-certificate"></i>
-                  <span>Meus Certificados</span>
-                </router-link>
-                <router-link to="/cursos/meus-cursos" class="dropdown-item">
-                  <i class="ti ti-book"></i>
-                  <span>Meus Cursos</span>
-                </router-link>
-                <a href="#!" class="dropdown-item" @click="logout">
-                  <i class="ti ti-power"></i>
-                  <span>Sair</span>
-                </a>
-              </div>
-              <div class="tab-pane fade" id="drp-tab-2" role="tabpanel" aria-labelledby="drp-t2" tabindex="0">
-                <router-link to="/perfil/configuracoes" class="dropdown-item">
-                  <i class="ti ti-settings"></i>
-                  <span>Configurações da Conta</span>
-                </router-link>
-                <router-link to="/perfil/privacidade" class="dropdown-item">
-                  <i class="ti ti-lock"></i>
-                  <span>Privacidade</span>
-                </router-link>
-                <router-link to="/notificacoes" class="dropdown-item">
-                  <i class="ti ti-bell"></i>
-                  <span>Notificações</span>
-                </router-link>
-                <router-link to="/ajuda" class="dropdown-item">
-                  <i class="ti ti-help"></i>
-                  <span>Ajuda e Suporte</span>
-                </router-link>
-              </div>
-            </div>
-          </div>
-        </li>
+          </li>
+        </template>
       </ul>
     </div>
   </div>
@@ -236,8 +158,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuth } from '@/composables/useAuth';
+import { useSidebar } from '@/composables/useSidebar';
 
 const router = useRouter();
 const termoBusca = ref('');
@@ -246,7 +170,7 @@ const termoBusca = ref('');
 const { currentUser, logout: authLogout, isAuthenticated, isAdmin } = useAuth();
 
 // Usa o sistema de sidebar
-const { toggleSidebar } = useSidebar();
+const { toggleSidebar, isCollapsed, isMobile } = useSidebar();
 
 // Método para realizar a busca
 const realizarBusca = () => {
@@ -261,8 +185,8 @@ const realizarBusca = () => {
 
 // Método para obter as iniciais do usuário para o avatar
 const getUserInitials = () => {
-  if (!userName.value) return 'U';
-  return userName.value
+  if (!currentUser.value?.nome) return 'U';
+  return currentUser.value.nome
     .split(' ')
     .map(name => name.charAt(0))
     .join('')
@@ -272,10 +196,38 @@ const getUserInitials = () => {
 
 // Método de logout
 const logout = () => {
-  // Aqui implementaríamos a lógica real de logout
-  // Por enquanto apenas simularemos redirecionando para a home
+  authLogout();
   router.push('/');
+  closeDropdown();
 };
+
+// Controle do dropdown
+const dropdownRef = ref<HTMLElement | null>(null);
+const isDropdownOpen = ref(false);
+
+const toggleDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value;
+};
+
+const closeDropdown = () => {
+  isDropdownOpen.value = false;
+};
+
+// Fechar dropdown ao clicar fora
+const handleClickOutside = (event: MouseEvent) => {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
+    closeDropdown();
+  }
+};
+
+// Adicionar/remover event listeners
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 </script>
 
 <style scoped>
@@ -297,10 +249,108 @@ const logout = () => {
   bottom: 0;
 }
 
-.user-avtar {
+.user-avatar {
   width: 30px;
   height: 30px;
-  border-radius: 50%;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* === BOTÕES DE AUTENTICAÇÃO MODERNOS === */
+.auth-buttons-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-entrar,
+.btn-cadastrar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  min-width: 90px;
+  white-space: nowrap;
+  height: 38px;
+}
+
+/* Botão Entrar - Estilo Bootstrap Outline */
+.btn-entrar {
+  color: #1890ff;
+  background: transparent;
+  border: 1px solid #1890ff;
+}
+
+.btn-entrar:hover {
+  color: #ffffff;
+  background: #1890ff;
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-entrar:active {
+  transform: translateY(0px);
+  box-shadow: 0 1px 4px rgba(24, 144, 255, 0.2);
+}
+
+/* Botão Cadastrar - Estilo Bootstrap Primary */
+.btn-cadastrar {
+  color: #ffffff;
+  background: #1890ff;
+  border: 1px solid #1890ff;
+}
+
+.btn-cadastrar:hover {
+  color: #ffffff;
+  background: #0b7ce8;
+  border-color: #0b7ce8;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-cadastrar:active {
+  transform: translateY(0px);
+  box-shadow: 0 1px 4px rgba(24, 144, 255, 0.2);
+}
+
+/* Ícones dos botões */
+.btn-entrar i,
+.btn-cadastrar i {
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+.btn-entrar:hover i,
+.btn-cadastrar:hover i {
+  transform: translateX(-1px);
+}
+
+/* Responsividade para mobile */
+@media (max-width: 576px) {
+  .auth-buttons-container {
+    gap: 6px;
+  }
+  
+  .btn-entrar,
+  .btn-cadastrar {
+    min-width: 80px;
+    padding: 6px 12px;
+    font-size: 13px;
+    height: 34px;
+  }
+  
+  .btn-entrar i,
+  .btn-cadastrar i {
+    font-size: 13px;
+  }
 }
 
 .avatar {
@@ -313,5 +363,66 @@ const logout = () => {
   background-color: #1976d2;
   color: white;
   font-weight: bold;
+}
+
+/* Controle de visibilidade do dropdown */
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 1000;
+  min-width: 280px;
+  padding: 0.5rem 0;
+  margin: 0.125rem 0 0;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.175);
+  border-radius: 0.375rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  color: #212529;
+  text-decoration: none;
+  background-color: transparent;
+  border: 0;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: #1e2125;
+}
+
+.dropdown-item.text-danger {
+  color: #dc3545 !important;
+}
+
+.dropdown-item.text-danger:hover {
+  background-color: #f8f9fa;
+  color: #dc3545 !important;
+}
+
+.dropdown-divider {
+  height: 0;
+  margin: 0.5rem 0;
+  overflow: hidden;
+  border-top: 1px solid #dee2e6;
+}
+
+.dropdown-header {
+  display: block;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0;
+  font-size: 0.875rem;
+  color: #6c757d;
+  white-space: nowrap;
 }
 </style>

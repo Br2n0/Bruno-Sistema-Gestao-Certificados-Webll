@@ -3,7 +3,7 @@
   <NavSideBar />
   <HeadBar />
 
-  <div class="pc-container">
+  <div class="pc-container" :class="{ 'sidebar-collapsed': isCollapsed && !isMobile }">
     <div class="pc-content">
       <BreadCrumb />
 
@@ -20,100 +20,93 @@ import HeadBar from './layout/HeadBar.vue'
 import FooterBar from './layout/FooterBar.vue'
 import BreadCrumb from './layout/BreadCrumb.vue'
 import LoaderBg from './layout/LoaderBg.vue'
+import { useSidebar } from './composables/useSidebar'
+
+const { isCollapsed, isMobile } = useSidebar()
 </script>
 
 <style>
-/* Estilos globais para funcionalidade de sidebar */
-.pc-sidebar {
-  transition: transform 0.3s ease-in-out;
+/* Reset e layout básico */
+* {
+  box-sizing: border-box;
 }
 
-/* Estado escondido */
-.pc-sidebar-hide {
-  transform: translateX(-100%);
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
-/* Ajustes para o container principal */
+/* === LAYOUT PRINCIPAL === */
+
+/* === HEADER STYLES === */
+.pc-header {
+  position: fixed;
+  top: 0;
+  left: 280px;
+  right: 0;
+  height: 70px;
+  z-index: 1040;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  transition: left 0.3s ease;
+}
+
+/* === CONTAINER STYLES === */
 .pc-container {
-  transition: margin-left 0.3s ease-in-out;
+  margin-left: 280px;
+  padding-top: 70px;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
 }
 
-/* Em telas maiores que 992px */
-@media (min-width: 992px) {
-  .pc-sidebar {
-    position: relative;
-  }
-  
-  .pc-sidebar-hide {
-    transform: translateX(-100%);
-  }
+/* === SIDEBAR COLLAPSED STATE === */
+.pc-container.sidebar-collapsed {
+  margin-left: 70px;
 }
 
-/* Em telas menores que 992px */
-@media (max-width: 991.98px) {
-  .pc-sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    z-index: 1050;
-    background: white;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-    transform: translateX(-100%);
-  }
-  
-  .pc-sidebar:not(.pc-sidebar-hide) {
-    transform: translateX(0);
-  }
-}
-</style><style scoped></style>
-
-->
-
-<style>
-/* Estilos globais para funcionalidade de sidebar */
-.pc-sidebar {
-  transition: transform 0.3s ease, width 0.3s ease;
+.pc-header.sidebar-collapsed {
+  left: 70px;
 }
 
-.pc-sidebar-hide {
-  transform: translateX(-100%);
+.pc-content {
+  padding: 20px;
+  min-height: calc(100vh - 90px);
 }
 
-/* Para telas menores (mobile) */
-@media (max-width: 991.98px) {
-  .pc-sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    z-index: 1050;
-    transform: translateX(-100%);
-  }
-  
-  .pc-sidebar:not(.pc-sidebar-hide) {
-    transform: translateX(0);
-  }
-}
+/* === RESPONSIVE BEHAVIOR === */
 
-/* Para telas maiores (desktop) */
-@media (min-width: 992px) {
-  .pc-sidebar-hide {
-    width: 70px;
-    transform: none;
-  }
-  
-  .pc-sidebar-hide .pc-mtext,
-  .pc-sidebar-hide .pc-arrow {
-    opacity: 0;
-    visibility: hidden;
+/* Mobile (sidebar overlay) */
+@media (max-width: 991px) {
+  .pc-header {
+    left: 0 !important;
   }
   
   .pc-container {
-    transition: margin-left 0.3s ease;
+    margin-left: 0 !important;
   }
   
-  .pc-sidebar-hide ~ .pc-container {
+  .pc-container.sidebar-collapsed {
+    margin-left: 0 !important;
+  }
+}
+
+/* Desktop (sidebar collapsed) */
+@media (min-width: 992px) {
+  /* Ajustar header quando sidebar minimizada */
+  .pc-header.sidebar-collapsed {
+    left: 70px;
+  }
+  
+  /* Ajustar container quando sidebar minimizada */
+  .pc-container.sidebar-collapsed {
     margin-left: 70px;
   }
+}
+
+/* === ANIMAÇÕES GLOBAIS === */
+.pc-header,
+.pc-container {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>
