@@ -64,23 +64,16 @@
     <!-- [Right Side Menu] -->
     <div class="ms-auto">
       <ul class="list-unstyled">
-        <!-- Quando usuário NÃO está logado - mostrar Entrar/Criar Conta -->
+        <!-- Quando usuário NÃO está logado - mostrar apenas Entrar -->
         <template v-if="!isAuthenticated">
           <li class="pc-h-item d-flex align-items-center">
             <div class="auth-buttons-container">
               <router-link 
                 to="/login" 
-                class="btn-entrar me-2"
+                class="btn-entrar-azul"
               >
                 <i class="ti ti-login me-2"></i>
                 Entrar
-              </router-link>
-              <router-link 
-                to="/registro" 
-                class="btn-cadastrar"
-              >
-                <i class="ti ti-user-plus me-2"></i>
-                Criar Conta
               </router-link>
             </div>
           </li>
@@ -263,8 +256,7 @@ onUnmounted(() => {
   gap: 8px;
 }
 
-.btn-entrar,
-.btn-cadastrar {
+.btn-entrar-azul {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -279,76 +271,45 @@ onUnmounted(() => {
   min-width: 90px;
   white-space: nowrap;
   height: 38px;
-}
-
-/* Botão Entrar - Estilo Bootstrap Outline */
-.btn-entrar {
-  color: #1890ff;
-  background: transparent;
-  border: 1px solid #1890ff;
-}
-
-.btn-entrar:hover {
   color: #ffffff;
-  background: #1890ff;
-  border-color: #1890ff;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.25);
+  background: #4f46e5;
+  border: 1px solid #4f46e5;
+}
+
+.btn-entrar-azul:hover {
+  color: #ffffff;
+  background: #4338ca;
+  border-color: #4338ca;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
   transform: translateY(-1px);
+  text-decoration: none;
 }
 
-.btn-entrar:active {
+.btn-entrar-azul:active {
   transform: translateY(0px);
-  box-shadow: 0 1px 4px rgba(24, 144, 255, 0.2);
+  box-shadow: 0 1px 4px rgba(79, 70, 229, 0.2);
 }
 
-/* Botão Cadastrar - Estilo Bootstrap Primary */
-.btn-cadastrar {
-  color: #ffffff;
-  background: #1890ff;
-  border: 1px solid #1890ff;
-}
-
-.btn-cadastrar:hover {
-  color: #ffffff;
-  background: #0b7ce8;
-  border-color: #0b7ce8;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
-  transform: translateY(-1px);
-}
-
-.btn-cadastrar:active {
-  transform: translateY(0px);
-  box-shadow: 0 1px 4px rgba(24, 144, 255, 0.2);
-}
-
-/* Ícones dos botões */
-.btn-entrar i,
-.btn-cadastrar i {
+/* Ícones do botão */
+.btn-entrar-azul i {
   font-size: 14px;
   transition: transform 0.2s ease;
 }
 
-.btn-entrar:hover i,
-.btn-cadastrar:hover i {
+.btn-entrar-azul:hover i {
   transform: translateX(-1px);
 }
 
 /* Responsividade para mobile */
 @media (max-width: 576px) {
-  .auth-buttons-container {
-    gap: 6px;
-  }
-  
-  .btn-entrar,
-  .btn-cadastrar {
+  .btn-entrar-azul {
     min-width: 80px;
     padding: 6px 12px;
     font-size: 13px;
     height: 34px;
   }
   
-  .btn-entrar i,
-  .btn-cadastrar i {
+  .btn-entrar-azul i {
     font-size: 13px;
   }
 }

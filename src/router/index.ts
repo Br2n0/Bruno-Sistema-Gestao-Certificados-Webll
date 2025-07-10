@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuth } from '@/composables/useAuth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -114,14 +115,47 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () => import('../views/configuracoes/IndexView.vue'), // Placeholder
+      component: () => import('../views/auth/LoginCadastroView.vue'),
     },
     {
       path: '/registro',
       name: 'registro',
-      component: () => import('../views/configuracoes/IndexView.vue'), // Placeholder
+      redirect: '/login'
     }
   ]
+})
+
+// Guard de rota para proteger rotas que precisam de autenticação
+router.beforeEach((to, from, next) => {
+  const { isAuthenticated, isAdmin } = useAuth()
+  
+  // Verifica se a rota requer autenticação
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!isAuthenticated.value) {
+      // Redireciona para login com a página de destino
+      next({
+        path: '/login',
+        query: { redirect: to.fullPath }
+      })
+      return
+    }
+    
+    // Verifica se a rota requer privilégios de admin
+    if (to.matched.some(record => record.meta.requiresAdmin)) {
+      if (!isAdmin.value) {
+        // Redireciona para home se não for admin
+        next({
+          path: '/',
+          query: { error: 'access_denied' }
+        })
+        return
+      }
+    }
+    
+    next()
+  } else {
+    next()
+  }
 })
 
 export default router

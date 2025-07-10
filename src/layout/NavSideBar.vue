@@ -93,13 +93,10 @@
             <li class="pc-item">
               <router-link 
                 to="/admin/usuarios" 
-                class="pc-link"
+                class="pc-link admin-link"
                 :title="isCollapsed ? 'Gestão de Usuários' : ''"
                 @click="closeMobileMenu"
               >
-                <span class="pc-micon">
-                  <i class="ti ti-users"></i>
-                </span>
                 <span class="pc-mtext">Gestão de Usuários</span>
               </router-link>
             </li>
@@ -107,13 +104,10 @@
             <li class="pc-item">
               <router-link 
                 to="/admin/cursos" 
-                class="pc-link"
+                class="pc-link admin-link"
                 :title="isCollapsed ? 'Gestão de Cursos' : ''"
                 @click="closeMobileMenu"
               >
-                <span class="pc-micon">
-                  <i class="ti ti-book-2"></i>
-                </span>
                 <span class="pc-mtext">Gestão de Cursos</span>
               </router-link>
             </li>
@@ -121,13 +115,10 @@
             <li class="pc-item">
               <router-link 
                 to="/admin/professores" 
-                class="pc-link"
+                class="pc-link admin-link"
                 :title="isCollapsed ? 'Gestão de Professores' : ''"
                 @click="closeMobileMenu"
               >
-                <span class="pc-micon">
-                  <i class="ti ti-user-star"></i>
-                </span>
                 <span class="pc-mtext">Gestão de Professores</span>
               </router-link>
             </li>
@@ -135,13 +126,10 @@
             <li class="pc-item">
               <router-link 
                 to="/admin/certificados" 
-                class="pc-link"
+                class="pc-link admin-link"
                 :title="isCollapsed ? 'Gestão de Certificados' : ''"
                 @click="closeMobileMenu"
               >
-                <span class="pc-micon">
-                  <i class="ti ti-certificate-2"></i>
-                </span>
                 <span class="pc-mtext">Gestão de Certificados</span>
               </router-link>
             </li>
@@ -149,13 +137,10 @@
             <li class="pc-item">
               <router-link 
                 to="/admin/configuracoes" 
-                class="pc-link"
+                class="pc-link admin-link"
                 :title="isCollapsed ? 'Configurações do Sistema' : ''"
                 @click="closeMobileMenu"
               >
-                <span class="pc-micon">
-                  <i class="ti ti-settings-cog"></i>
-                </span>
                 <span class="pc-mtext">Configurações do Sistema</span>
               </router-link>
             </li>
@@ -208,12 +193,12 @@ const closeMobileMenu = () => {
 
 /* === HEADER/LOGO === */
 .m-header {
-  padding: 15px;
+  padding: 8px 15px;
   border-bottom: 1px solid #e5e7eb;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 70px;
+  min-height: 50px;
 }
 
 .b-brand {
@@ -224,14 +209,14 @@ const closeMobileMenu = () => {
 }
 
 .logo-lg {
-  max-width: 90px;
+  max-width: 70px;
   height: auto;
   transition: all 0.3s ease;
 }
 
 .logo-mini {
-  width: 40px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -251,7 +236,7 @@ const closeMobileMenu = () => {
 
 /* === NAVBAR === */
 .navbar-content {
-  padding: 10px 0;
+  padding: 5px 0;
 }
 
 .pc-navbar {
@@ -262,13 +247,13 @@ const closeMobileMenu = () => {
 
 /* === MENU ITEMS === */
 .pc-item {
-  margin: 2px 10px;
+  margin: 1px 10px;
 }
 
 .pc-link {
   display: flex;
   align-items: center;
-  padding: 12px 15px;
+  padding: 8px 15px;
   text-decoration: none;
   color: #6b7280;
   border-radius: 8px;
@@ -285,6 +270,16 @@ const closeMobileMenu = () => {
 .pc-link.router-link-active {
   background-color: #4f46e5;
   color: white;
+}
+
+/* === ADMIN LINKS === */
+.admin-link {
+  padding-left: 25px !important;
+}
+
+.admin-link .pc-mtext {
+  font-size: 13px;
+  font-weight: 400;
 }
 
 /* === ÍCONES E TEXTOS === */
@@ -338,11 +333,27 @@ const closeMobileMenu = () => {
 
 .pc-sidebar-collapsed .pc-link {
   justify-content: center;
-  padding: 12px 0;
+  padding: 8px 0;
 }
 
 .pc-sidebar-collapsed .pc-item {
-  margin: 2px 5px;
+  margin: 1px 5px;
+}
+
+/* === ADMIN LINKS NO MODO COLLAPSED === */
+.pc-sidebar-collapsed .admin-link {
+  padding: 6px 0 !important;
+  justify-content: center;
+}
+
+.pc-sidebar-collapsed .admin-link .pc-mtext {
+  display: none;
+}
+
+.pc-sidebar-collapsed .admin-link::after {
+  content: '•';
+  font-size: 16px;
+  color: #6b7280;
 }
 
 /* === TOOLTIPS === */

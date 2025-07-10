@@ -1,28 +1,49 @@
 <template>
-  <LoaderBg />
-  <NavSideBar />
-  <HeadBar />
-
-  <div class="pc-container" :class="{ 'sidebar-collapsed': isCollapsed && !isMobile }">
-    <div class="pc-content">
-      <BreadCrumb />
-
-      <router-view></router-view>
-    </div>
+  <!-- Layout para rotas de autenticação -->
+  <div v-if="isAuthRoute">
+    <router-view></router-view>
   </div>
+  
+  <!-- Layout padrão para outras rotas -->
+  <div v-else>
+    <NavSideBar />
+    <HeadBar />
 
-  <FooterBar />
+    <div class="pc-container" :class="{ 'sidebar-collapsed': isCollapsed && !isMobile }">
+      <div class="pc-content">
+        <BreadCrumb />
+
+        <router-view></router-view>
+      </div>
+    </div>
+
+    <FooterBar />
+  </div>
 </template>
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import { computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import NavSideBar from './layout/NavSideBar.vue'
 import HeadBar from './layout/HeadBar.vue'
 import FooterBar from './layout/FooterBar.vue'
 import BreadCrumb from './layout/BreadCrumb.vue'
-import LoaderBg from './layout/LoaderBg.vue'
 import { useSidebar } from './composables/useSidebar'
+import { useAuth } from './composables/useAuth'
 
 const { isCollapsed, isMobile } = useSidebar()
+const { initialize } = useAuth()
+const route = useRoute()
+
+// Verificar se é uma rota de autenticação
+const isAuthRoute = computed(() => {
+  return route.path.startsWith('/login') || route.path.startsWith('/registro')
+})
+
+// Inicializar sistema de autenticação
+onMounted(async () => {
+  await initialize()
+})
 </script>
 
 <style>
