@@ -34,7 +34,7 @@
               </div>
               <div class="col-md-4 text-center">
                 <div class="border p-3 rounded bg-light">
-                  <img src="@/assets/images/certificate-template.svg" alt="Certificado" class="img-fluid mb-3" />
+                  <img src="@/assets/images/certificado-template.png" alt="Certificado" class="img-fluid mb-3" />
                   <div class="d-grid gap-2">
                     <button 
                       class="btn btn-primary" 

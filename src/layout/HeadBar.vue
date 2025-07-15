@@ -44,16 +44,6 @@
             <i class="ti ti-book nav-icon"></i>
             <span class="nav-text">Cursos</span>
           </router-link>
-
-          <!-- Certificados (só se logado) -->
-          <router-link 
-            v-if="isAuthenticated" 
-            to="/certificados" 
-            class="nav-item"
-          >
-            <i class="ti ti-certificate nav-icon"></i>
-            <span class="nav-text">Certificados</span>
-          </router-link>
         </nav>
 
         <!-- Botões de Autenticação -->
@@ -68,11 +58,6 @@
 
           <!-- Usuário logado -->
           <template v-else>
-            <!-- Notificações -->
-            <button class="notification-btn" title="Notificações">
-              <i class="ti ti-bell"></i>
-            </button>
-
             <!-- Menu do usuário -->
             <div class="user-menu" ref="userMenuRef">
               <button @click="toggleUserMenu" class="user-btn">
@@ -108,6 +93,16 @@
                 </div>
                 
                 <div class="dropdown-divider"></div>
+                
+                <router-link to="/meus-cursos" class="dropdown-item" @click="closeUserMenu">
+                  <i class="ti ti-book"></i>
+                  <span>Meus Cursos</span>
+                </router-link>
+                
+                <router-link to="/certificados" class="dropdown-item" @click="closeUserMenu">
+                  <i class="ti ti-certificate"></i>
+                  <span>Certificados</span>
+                </router-link>
                 
                 <router-link to="/configuracoes" class="dropdown-item" @click="closeUserMenu">
                   <i class="ti ti-settings"></i>
@@ -435,23 +430,7 @@ onUnmounted(() => {
   transform: translateY(-1px);
 }
 
-.notification-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 8px;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
 
-.notification-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
 
 /* === MENU DO USUÁRIO === */
 .user-menu {

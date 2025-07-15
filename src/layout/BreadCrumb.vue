@@ -20,6 +20,7 @@ const title = computed(() => {
   const routeMap: Record<string, string> = {
     'home': 'Bem-vindo ao Hábeis Educacional',
     'cursos': 'Nossos Cursos',
+    'meus-cursos': 'Meus Cursos',
     'certificados': 'Meus Certificados',
     'configuracoes': 'Configurações',
     'configuracoes-perfil': 'Configurações do Perfil',
@@ -51,7 +52,7 @@ const title = computed(() => {
 
 .page-title h1 {
   margin: 0;
-  font-size: 32px;
+  font-size: 40px;
   font-weight: 700;
   color: #1e293b;
   line-height: 1.2;

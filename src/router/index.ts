@@ -23,9 +23,16 @@ const router = createRouter({
       component: () => import('../views/cursos/IndexView.vue'), // Reutiliza com filtro
     },
     {
-      path: '/cursos/meus-cursos',
+      path: '/meus-cursos',
       name: 'meus-cursos',
-      component: () => import('../views/cursos/IndexView.vue'), // Reutiliza com filtro
+      component: () => import('../views/cursos/MeusCursosView.vue'),
+      meta: { requiresAuth: true }
+    },
+    // 🎓 Curso Individual (ambiente virtual de estudos)
+    {
+      path: '/curso/:id',
+      name: 'curso-estudo',
+      component: () => import('../views/cursos/EstudoView.vue'),
       meta: { requiresAuth: true }
     },
     

@@ -177,6 +177,42 @@ export const getUserPassword = (userId: string): string | null => {
   }
 }
 
+// Alterar senha do usuário
+export const changeUserPassword = async (userId: string, currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
+  try {
+    // Verificar se a senha atual está correta
+    const currentHash = getUserPassword(userId)
+    if (!currentHash) {
+      return { success: false, message: 'Usuário não encontrado' }
+    }
+
+    // Importar verificação de senha
+    const { verifyPassword, hashPassword } = await import('./autenticacao')
+    
+    const isCurrentPasswordValid = await verifyPassword(currentPassword, currentHash)
+    if (!isCurrentPasswordValid) {
+      return { success: false, message: 'Senha atual incorreta' }
+    }
+
+    // Verificar se a nova senha é diferente da atual
+    if (currentPassword === newPassword) {
+      return { success: false, message: 'A nova senha deve ser diferente da senha atual' }
+    }
+
+    // Gerar hash da nova senha
+    const newPasswordHash = await hashPassword(newPassword)
+    
+    // Salvar nova senha
+    saveUserPassword(userId, newPasswordHash)
+    
+    return { success: true, message: 'Senha alterada com sucesso' }
+    
+  } catch (error) {
+    console.error('Erro ao alterar senha:', error)
+    return { success: false, message: 'Erro interno. Tente novamente' }
+  }
+}
+
 // Inicializar sistema com admin padrão
 export const initializeSystem = async (): Promise<void> => {
   const isInitialized = localStorage.getItem(STORAGE_KEYS.INITIALIZED)

@@ -360,9 +360,8 @@ const acessarCurso = (curso: Curso) => {
     // Redirecionar para a tela de login/cadastro
     router.push('/login')
   } else {
-    // Usuário logado - redirecionar para o curso (implementar futuramente)
-    console.log('Acessando curso:', curso.nome)
-    // TODO: Implementar redirecionamento para o curso específico
+    // Usuário logado - redirecionar para o ambiente virtual de estudos
+    router.push(`/curso/${curso.id}`)
   }
 }
 

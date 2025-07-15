@@ -13,7 +13,8 @@ import {
   getUserPassword, 
   initializeSystem,
   loadUsers,
-  getSystemStats
+  getSystemStats,
+  changeUserPassword
 } from '@/utils/armazenamento'
 
 // Estado global de autenticação
@@ -239,6 +240,15 @@ export function useAuth() {
     return updatedUser
   }
 
+  // Alterar senha do usuário
+  const alterarSenhaUsuario = async (senhaAtual: string, novaSenha: string): Promise<{ success: boolean; message: string }> => {
+    if (!authState.value.user) {
+      return { success: false, message: 'Usuário não autenticado' }
+    }
+
+    return await changeUserPassword(authState.value.user.id, senhaAtual, novaSenha)
+  }
+
   const getStats = () => {
     if (!hasPermission('canAccessAdmin')) {
       throw new Error('Sem permissão para visualizar estatísticas')
@@ -270,6 +280,7 @@ export function useAuth() {
     
     // Métodos de perfil
     updateUserProfile,
+    alterarSenhaUsuario,
     
     // Métodos administrativos
     getAllUsers,
