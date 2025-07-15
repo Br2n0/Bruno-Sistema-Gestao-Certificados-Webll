@@ -492,7 +492,7 @@ const fecharMensagem = () => {
 
 .security-info .info-item {
   padding: 12px;
-  background: #f8f9fa;
+  background: white;
   border-radius: 8px;
   border: 1px solid #e9ecef;
 }

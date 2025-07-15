@@ -1,17 +1,14 @@
 <template>
   <header class="modern-header">
     <div class="header-container">
-      <!-- Logo + Nome da Empresa -->
+      <!-- Logo -->
       <div class="brand-section">
         <router-link to="/" class="brand-link">
           <img 
-            src="../assets/imagens/logotipo.png" 
+            src="../assets/imagens/logotipoazul.png" 
             alt="Hábeis Educacional" 
             class="brand-logo"
           />
-          <div class="brand-text">
-            <span class="brand-name">Hábeis Educacional</span>
-          </div>
         </router-link>
       </div>
 
@@ -50,7 +47,11 @@
         <div class="auth-section">
           <!-- Usuário NÃO logado -->
           <template v-if="!isAuthenticated">
-            <router-link to="/login" class="btn-entrar">
+            <router-link 
+              to="/login" 
+              class="btn-entrar"
+              :class="{ 'disabled': isLoginPage }"
+            >
               <i class="ti ti-login"></i>
               <span>Entrar</span>
             </router-link>
@@ -108,6 +109,31 @@
                   <i class="ti ti-settings"></i>
                   <span>Configurações</span>
                 </router-link>
+                
+                <!-- 🛡️ SEÇÃO ADMINISTRATIVA (só para administradores) -->
+                <template v-if="isAdmin">
+                  <div class="dropdown-divider"></div>
+                  
+                  <div class="dropdown-section-title">
+                    <i class="ti ti-shield-lock"></i>
+                    <span>Administração</span>
+                  </div>
+                  
+                  <router-link to="/admin/usuarios" class="dropdown-item admin-item" @click="closeUserMenu">
+                    <i class="ti ti-users"></i>
+                    <span>Gestão de Usuários</span>
+                  </router-link>
+                  
+                  <router-link to="/admin/cursos" class="dropdown-item admin-item" @click="closeUserMenu">
+                    <i class="ti ti-book"></i>
+                    <span>Gestão de Cursos</span>
+                  </router-link>
+                  
+                  <router-link to="/admin/certificados" class="dropdown-item admin-item" @click="closeUserMenu">
+                    <i class="ti ti-certificate"></i>
+                    <span>Gestão de Certificados</span>
+                  </router-link>
+                </template>
                 
                 <div class="dropdown-divider"></div>
                 
@@ -174,18 +200,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
+const route = useRoute()
 const termoBusca = ref('')
 const isUserMenuOpen = ref(false)
 const isMobileMenuOpen = ref(false)
 const userMenuRef = ref<HTMLElement | null>(null)
 
 // Sistema de autenticação
-const { currentUser, logout: authLogout, isAuthenticated } = useAuth()
+const { currentUser, logout: authLogout, isAuthenticated, isAdmin } = useAuth()
+
+// Verificar se está na página de login
+const isLoginPage = computed(() => {
+  return route.path.startsWith('/login')
+})
 
 // Realizar busca
 const realizarBusca = () => {
@@ -258,10 +290,10 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   height: 80px;
-  background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+  background: #2c3cdc;
   color: white;
   z-index: 1000;
-  box-shadow: 0 4px 20px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 20px rgba(44, 60, 220, 0.3);
 }
 
 .header-container {
@@ -290,22 +322,11 @@ onUnmounted(() => {
 }
 
 .brand-logo {
-  height: 45px;
+  height: 65px;
   width: auto;
-  filter: brightness(0) invert(1);
 }
 
-.brand-text {
-  display: flex;
-  flex-direction: column;
-}
 
-.brand-name {
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.2;
-  color: white;
-}
 
 /* === SEÇÃO DE PESQUISA === */
 .search-section {
@@ -351,7 +372,7 @@ onUnmounted(() => {
 }
 
 .search-input:focus {
-  background: white;
+  background: #fcfcfc;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
 }
 
@@ -430,6 +451,14 @@ onUnmounted(() => {
   transform: translateY(-1px);
 }
 
+.btn-entrar.disabled {
+  background: rgba(108, 117, 125, 0.3);
+  color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(108, 117, 125, 0.3);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 
 
 /* === MENU DO USUÁRIO === */
@@ -485,7 +514,7 @@ onUnmounted(() => {
   right: 0;
   margin-top: 8px;
   width: 250px;
-  background: white;
+  background: #fcfcfc;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   border: 1px solid #e5e7eb;
@@ -504,7 +533,7 @@ onUnmounted(() => {
 .user-avatar-large {
   width: 40px;
   height: 40px;
-  background: #4f46e5;
+  background: #2c3cdc;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -570,6 +599,38 @@ onUnmounted(() => {
   margin: 8px 0;
 }
 
+.dropdown-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dropdown-section-title i {
+  font-size: 14px;
+  color: #2c3cdc;
+}
+
+.admin-item {
+  color: #2c3cdc !important;
+  font-weight: 500;
+}
+
+.admin-item:hover {
+  background: #f1f5f9 !important;
+  color: #1e40af !important;
+}
+
+.admin-item i {
+  color: #2c3cdc;
+}
+
 /* === MENU MOBILE === */
 .mobile-menu-btn {
   display: none;
@@ -595,7 +656,7 @@ onUnmounted(() => {
   top: 100%;
   left: 0;
   right: 0;
-  background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+  background: #2c3cdc;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding: 20px;
   gap: 5px;

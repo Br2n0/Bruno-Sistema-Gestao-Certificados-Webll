@@ -21,6 +21,7 @@ const title = computed(() => {
     'home': 'Bem-vindo ao Hábeis Educacional',
     'cursos': 'Nossos Cursos',
     'meus-cursos': 'Meus Cursos',
+    'curso-estudo': 'Ambiente de Aprendizagem',
     'certificados': 'Meus Certificados',
     'configuracoes': 'Configurações',
     'configuracoes-perfil': 'Configurações do Perfil',
@@ -38,8 +39,7 @@ const title = computed(() => {
 
 <style scoped>
 .breadcrumb-section {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border-bottom: 1px solid #e2e8f0;
+  background: #fcfcfc;
   padding: 25px 0;
   margin-bottom: 20px;
 }

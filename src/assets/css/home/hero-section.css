@@ -1,0 +1,121 @@
+/* Importar fontes do Google */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap');
+
+/* Hero Section Limpo */
+.hero-section-clean {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  margin-bottom: 4rem;
+  background: #fcfcfc;
+}
+
+.hero-content-clean {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.hero-text-section {
+  padding-right: 2rem;
+}
+
+.hero-title-clean {
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  color: #2d3748;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.title-brand {
+  color: #667eea;
+}
+
+.title-emphasis {
+  color: #48bb78;
+}
+
+.hero-subtitle-clean {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+  color: #718096;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.hero-logo-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 2rem;
+}
+
+.logo-main {
+  text-align: center;
+}
+
+.logo-image {
+  max-width: 400px;
+  width: 100%;
+  height: auto;
+  opacity: 0.9;
+  transition: all 0.3s ease;
+}
+
+.logo-image:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* Responsividade */
+@media (max-width: 968px) {
+  .hero-content-clean {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    text-align: center;
+  }
+  
+  .hero-text-section {
+    padding-right: 0;
+    order: 1;
+  }
+  
+  .hero-logo-section {
+    padding-left: 0;
+    order: 2;
+  }
+  
+  .hero-title-clean {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-content-clean {
+    padding: 0 15px;
+  }
+  
+  .hero-title-clean {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title-clean {
+    font-size: 2rem;
+  }
+  
+  .logo-image {
+    max-width: 300px;
+  }
+} 

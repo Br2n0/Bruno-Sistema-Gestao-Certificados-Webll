@@ -1,197 +1,190 @@
 <template>
-  <div class="auth-fullscreen">
-    <div class="auth-container">
-      <!-- Logo centralizada acima dos ícones -->
-      <div class="auth-logo-header">
-        <img src="../../assets/imagens/logotipo.png" alt="Hábeis Educacional">
-      </div>
-      
-      <!-- Container das duas seções -->
-      <div class="auth-sections">
-        <!-- Seção de Cadastro -->
-        <div class="auth-section register-section">
-          <div class="auth-card">
-            <div class="auth-header">
-              <div class="auth-icon register-icon">
-                <i class="ti ti-user-plus"></i>
-              </div>
-              <h2>Crie sua conta gratuita e comece sua jornada de aprendizado!</h2>
+  <div class="auth-container">
+    <!-- Container das duas seções -->
+    <div class="auth-sections">
+      <!-- Seção de Cadastro -->
+      <div class="auth-section register-section">
+        <div class="auth-card">
+          <div class="auth-header">
+            <div class="auth-icon register-icon">
+              <i class="ti ti-user-plus"></i>
             </div>
-
-            <!-- Botão Google -->
-            <div class="social-buttons">
-              <button class="btn btn-google" @click="handleGoogleRegister">
-                <i class="ti ti-brand-google"></i>
-                Cadastrar com Google
-              </button>
-            </div>
-
-            <!-- Formulário de cadastro -->
-            <form @submit.prevent="handleRegister" class="auth-form">
-              <div class="form-group">
-                <label>Nome</label>
-                <input
-                  type="text"
-                  v-model="registerForm.nome"
-                  placeholder="Seu nome completo"
-                  :class="{ 'error': registerValidation.nome }"
-                  required
-                >
-                <div v-if="registerValidation.nome" class="field-error">{{ registerValidation.nome }}</div>
-              </div>
-
-              <div class="form-group">
-                <label>E-mail</label>
-                <input
-                  type="email"
-                  v-model="registerForm.email"
-                  placeholder="seu@email.com"
-                  :class="{ 'error': registerValidation.email }"
-                  required
-                >
-                <div v-if="registerValidation.email" class="field-error">{{ registerValidation.email }}</div>
-              </div>
-
-              <div class="form-group">
-                <label>Celular</label>
-                <input
-                  type="tel"
-                  v-model="registerForm.telefone"
-                  placeholder="(00) 00000-0000"
-                  :class="{ 'error': registerValidation.telefone }"
-                  @blur="formatPhoneNumber"
-                  required
-                >
-                <div v-if="registerValidation.telefone" class="field-error">{{ registerValidation.telefone }}</div>
-              </div>
-
-              <div class="form-group">
-                <label>Senha cadastro</label>
-                <div class="password-input">
-                  <input
-                    :type="showRegisterPassword ? 'text' : 'password'"
-                    v-model="registerForm.password"
-                    placeholder="Crie uma senha forte"
-                    :class="{ 'error': registerValidation.password }"
-                    required
-                  >
-                  <button
-                    type="button"
-                    @click="showRegisterPassword = !showRegisterPassword"
-                    class="password-toggle"
-                  >
-                    <i :class="showRegisterPassword ? 'ti ti-eye-off' : 'ti ti-eye'"></i>
-                  </button>
-                </div>
-                <div v-if="registerValidation.password" class="field-error">{{ registerValidation.password }}</div>
-                <div class="password-requirements">
-                  <small>• Mínimo de 6 caracteres</small>
-                  <small>• Mínimo de 1 letra</small>
-                  <small>• Mínimo de 1 número</small>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label>Confirmar senha</label>
-                <div class="password-input">
-                  <input
-                    :type="showRegisterPassword ? 'text' : 'password'"
-                    v-model="registerForm.confirmPassword"
-                    placeholder="Confirme sua senha"
-                    :class="{ 'error': registerValidation.confirmPassword }"
-                    required
-                  >
-                </div>
-                <div v-if="registerValidation.confirmPassword" class="field-error">{{ registerValidation.confirmPassword }}</div>
-              </div>
-
-              <div class="form-check">
-                <input
-                  type="checkbox"
-                  v-model="registerForm.terms"
-                  class="form-check-input"
-                  required
-                >
-                <label class="form-check-label">
-                  Ao se cadastrar, você concorda com nossos 
-                  <a href="#" class="terms-link">Termos de Uso</a> 
-                  e aceita receber comunicações da nossa plataforma.
-                </label>
-              </div>
-
-              <button type="submit" class="btn btn-primary btn-register" :disabled="isRegisterLoading">
-                <span v-if="isRegisterLoading" class="spinner"></span>
-                {{ isRegisterLoading ? 'Cadastrando...' : 'Cadastrar' }}
-              </button>
-
-              <div v-if="registerError" class="error-message">{{ registerError }}</div>
-            </form>
+            <h2>Crie sua conta gratuita e comece sua jornada de aprendizado!</h2>
           </div>
+
+          <!-- Botão Google -->
+          <div class="social-buttons">
+            <button class="btn btn-google" @click="handleGoogleRegister">
+              <i class="ti ti-brand-google"></i>
+              Cadastrar com Google
+            </button>
+          </div>
+
+          <!-- Formulário de cadastro -->
+          <form @submit.prevent="handleRegister" class="auth-form">
+            <div class="form-group">
+              <label>Nome</label>
+              <input
+                type="text"
+                v-model="registerForm.nome"
+                placeholder="Seu nome completo"
+                :class="{ 'error': registerValidation.nome }"
+                required
+              >
+              <div v-if="registerValidation.nome" class="field-error">{{ registerValidation.nome }}</div>
+            </div>
+
+            <div class="form-group">
+              <label>E-mail</label>
+              <input
+                type="email"
+                v-model="registerForm.email"
+                placeholder="seu@email.com"
+                :class="{ 'error': registerValidation.email }"
+                required
+              >
+              <div v-if="registerValidation.email" class="field-error">{{ registerValidation.email }}</div>
+            </div>
+
+            <div class="form-group">
+              <label>Celular</label>
+              <input
+                type="tel"
+                v-model="registerForm.telefone"
+                placeholder="(00) 00000-0000"
+                :class="{ 'error': registerValidation.telefone }"
+                @blur="formatPhoneNumber"
+                required
+              >
+              <div v-if="registerValidation.telefone" class="field-error">{{ registerValidation.telefone }}</div>
+            </div>
+
+            <div class="form-group">
+              <label>Senha cadastro</label>
+              <div class="password-input">
+                <input
+                  :type="showRegisterPassword ? 'text' : 'password'"
+                  v-model="registerForm.password"
+                  placeholder="Crie uma senha forte"
+                  :class="{ 'error': registerValidation.password }"
+                  required
+                >
+                <button
+                  type="button"
+                  @click="showRegisterPassword = !showRegisterPassword"
+                  class="password-toggle"
+                >
+                  <i :class="showRegisterPassword ? 'ti ti-eye-off' : 'ti ti-eye'"></i>
+                </button>
+              </div>
+              <div v-if="registerValidation.password" class="field-error">{{ registerValidation.password }}</div>
+              <div class="password-requirements">
+                <small>• Mínimo de 6 caracteres</small>
+                <small>• Mínimo de 1 letra</small>
+                <small>• Mínimo de 1 número</small>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Confirmar senha</label>
+              <div class="password-input">
+                <input
+                  :type="showRegisterPassword ? 'text' : 'password'"
+                  v-model="registerForm.confirmPassword"
+                  placeholder="Confirme sua senha"
+                  :class="{ 'error': registerValidation.confirmPassword }"
+                  required
+                >
+              </div>
+              <div v-if="registerValidation.confirmPassword" class="field-error">{{ registerValidation.confirmPassword }}</div>
+            </div>
+
+            <div class="form-check">
+              <input
+                type="checkbox"
+                v-model="registerForm.terms"
+                class="form-check-input"
+                required
+              >
+              <label class="form-check-label">
+                Ao se cadastrar, você concorda com nossos 
+                <a href="#" class="terms-link">Termos de Uso</a> 
+                e aceita receber comunicações da nossa plataforma.
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-register" :disabled="isRegisterLoading">
+              <span v-if="isRegisterLoading" class="spinner"></span>
+              {{ isRegisterLoading ? 'Cadastrando...' : 'Cadastrar' }}
+            </button>
+
+            <div v-if="registerError" class="error-message">{{ registerError }}</div>
+          </form>
         </div>
+      </div>
 
-        <!-- Seção de Login -->
-        <div class="auth-section login-section">
-          <div class="auth-card">
-            <div class="auth-header">
-              <div class="auth-icon login-icon">
-                <i class="ti ti-login"></i>
-              </div>
-              <h2>Acesse sua conta e continue explorando nossos cursos!</h2>
+      <!-- Seção de Login -->
+      <div class="auth-section login-section">
+        <div class="auth-card">
+          <div class="auth-header">
+            <div class="auth-icon login-icon">
+              <i class="ti ti-login"></i>
+            </div>
+            <h2>Acesse sua conta e continue explorando nossos cursos!</h2>
+          </div>
+
+          <!-- Botão Google -->
+          <div class="social-buttons">
+            <button class="btn btn-google" @click="handleGoogleLogin">
+              <i class="ti ti-brand-google"></i>
+              Entrar com Google
+            </button>
+          </div>
+
+          <!-- Formulário de login -->
+          <form @submit.prevent="handleLogin" class="auth-form">
+            <div class="form-group">
+              <label>E-mail</label>
+              <input
+                type="email"
+                v-model="loginForm.email"
+                placeholder="seu@email.com"
+                :class="{ 'error': loginValidation.email }"
+                required
+              >
+              <div v-if="loginValidation.email" class="field-error">{{ loginValidation.email }}</div>
             </div>
 
-            <!-- Botão Google -->
-            <div class="social-buttons">
-              <button class="btn btn-google" @click="handleGoogleLogin">
-                <i class="ti ti-brand-google"></i>
-                Entrar com Google
-              </button>
-            </div>
-
-            <!-- Formulário de login -->
-            <form @submit.prevent="handleLogin" class="auth-form">
-              <div class="form-group">
-                <label>E-mail</label>
+            <div class="form-group">
+              <label>Senha</label>
+              <div class="password-input">
                 <input
-                  type="email"
-                  v-model="loginForm.email"
-                  placeholder="seu@email.com"
-                  :class="{ 'error': loginValidation.email }"
+                  :type="showLoginPassword ? 'text' : 'password'"
+                  v-model="loginForm.password"
+                  placeholder="Digite sua senha"
                   required
                 >
-                <div v-if="loginValidation.email" class="field-error">{{ loginValidation.email }}</div>
+                <button
+                  type="button"
+                  @click="showLoginPassword = !showLoginPassword"
+                  class="password-toggle"
+                >
+                  <i :class="showLoginPassword ? 'ti ti-eye-off' : 'ti ti-eye'"></i>
+                </button>
               </div>
+            </div>
 
-              <div class="form-group">
-                <label>Senha</label>
-                <div class="password-input">
-                  <input
-                    :type="showLoginPassword ? 'text' : 'password'"
-                    v-model="loginForm.password"
-                    placeholder="Digite sua senha"
-                    required
-                  >
-                  <button
-                    type="button"
-                    @click="showLoginPassword = !showLoginPassword"
-                    class="password-toggle"
-                  >
-                    <i :class="showLoginPassword ? 'ti ti-eye-off' : 'ti ti-eye'"></i>
-                  </button>
-                </div>
-              </div>
+            <button type="submit" class="btn btn-primary btn-login" :disabled="isLoginLoading">
+              <span v-if="isLoginLoading" class="spinner"></span>
+              {{ isLoginLoading ? 'Entrando...' : 'Entrar' }}
+            </button>
 
-              <button type="submit" class="btn btn-primary btn-login" :disabled="isLoginLoading">
-                <span v-if="isLoginLoading" class="spinner"></span>
-                {{ isLoginLoading ? 'Entrando...' : 'Entrar' }}
-              </button>
+            <div v-if="loginError" class="error-message">{{ loginError }}</div>
 
-              <div v-if="loginError" class="error-message">{{ loginError }}</div>
-
-              <div class="forgot-password">
-                <a href="#" @click="showForgotPassword = true">Esqueceu a senha?</a>
-              </div>
-            </form>
-          </div>
+            <div class="forgot-password">
+              <a href="#" @click="showForgotPassword = true">Esqueceu a senha?</a>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -366,40 +359,13 @@ const handleGoogleRegister = () => {
 </script>
 
 <style scoped>
-.auth-fullscreen {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  padding: 15px;
-}
-
 .auth-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 1000px;
+  max-width: 1200px;
   width: 100%;
-  background: white;
-  border-radius: 0;
-  overflow: hidden;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+  margin: 0 auto;
+  background: transparent;
   position: relative;
-}
-
-.auth-logo-header {
-  width: 100%;
-  text-align: center;
-  padding: 20px 0 15px 0;
-  background: white;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.auth-logo-header img {
-  height: 100px;
-  width: auto;
+  margin-top: 5px;
 }
 
 .auth-sections {
@@ -409,25 +375,28 @@ const handleGoogleRegister = () => {
 }
 
 .auth-section {
-  padding: 20px 30px;
+  padding: 30px 40px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
 }
 
 .register-section {
-  background: white;
-  border-right: 1px solid #e5e7eb;
+  background: transparent;
 }
 
 .login-section {
-  background: white;
+  background: transparent;
 }
 
 .auth-card {
   width: 100%;
-  max-width: 350px;
+  max-width: 450px;
   margin: 0 auto;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .auth-header {
@@ -450,15 +419,15 @@ const handleGoogleRegister = () => {
   margin: 0 auto 10px;
   font-size: 20px;
   color: white;
-  background: #4f46e5;
+  background: #2c3cdc;
 }
 
 .register-icon {
-  background: #4f46e5;
+  background: #2c3cdc;
 }
 
 .login-icon {
-  background: #4f46e5;
+  background: #2c3cdc;
 }
 
 .auth-header h2 {
@@ -496,7 +465,7 @@ const handleGoogleRegister = () => {
 }
 
 .btn-google {
-  background: #f8f9fa;
+  background: white;
   color: #5f6368;
   border: 1px solid #dadce0;
 }
@@ -506,12 +475,12 @@ const handleGoogleRegister = () => {
 }
 
 .btn-primary {
-  background: #4f46e5;
+  background: #2c3cdc;
   color: white;
 }
 
 .btn-primary:hover {
-  background: #4338ca;
+  background: #2c3cdc;
 }
 
 .btn-primary:disabled {
@@ -522,7 +491,7 @@ const handleGoogleRegister = () => {
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .form-group {
@@ -549,8 +518,8 @@ const handleGoogleRegister = () => {
 
 .form-group input:focus {
   outline: none;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  border-color: #2c3cdc;
+  box-shadow: 0 0 0 3px rgba(44, 60, 220, 0.1);
 }
 
 .form-group input.error {
@@ -582,7 +551,7 @@ const handleGoogleRegister = () => {
 }
 
 .password-toggle:hover {
-  color: #4f46e5;
+  color: #2c3cdc;
 }
 
 .password-requirements {
@@ -616,7 +585,7 @@ const handleGoogleRegister = () => {
 }
 
 .terms-link {
-  color: #4f46e5;
+  color: #2c3cdc;
   text-decoration: none;
 }
 
@@ -649,7 +618,7 @@ const handleGoogleRegister = () => {
 }
 
 .forgot-password a {
-  color: #4f46e5;
+  color: #2c3cdc;
   text-decoration: none;
   font-size: 12px;
 }
@@ -677,32 +646,20 @@ const handleGoogleRegister = () => {
 @media (max-width: 768px) {
   .auth-container {
     flex-direction: column;
-    max-width: 450px;
+    max-width: 500px;
   }
   
   .auth-sections {
     grid-template-columns: 1fr;
   }
   
-  .register-section {
-    border-right: none;
-    border-bottom: 1px solid #e5e7eb;
-  }
-  
   .auth-section {
-    padding: 15px 20px;
+    padding: 20px 15px;
   }
   
-  .auth-fullscreen {
-    padding: 10px;
-  }
-  
-  .auth-logo-header {
-    padding: 12px 0 10px 0;
-  }
-  
-  .auth-logo-header img {
-    height: 80px;
+  .auth-card {
+    padding: 20px;
+    max-width: 100%;
   }
   
   .auth-header {
@@ -712,15 +669,12 @@ const handleGoogleRegister = () => {
 
 @media (max-width: 480px) {
   .auth-section {
-    padding: 12px 15px;
+    padding: 15px 10px;
   }
   
   .auth-card {
+    padding: 15px;
     max-width: 100%;
-  }
-  
-  .auth-logo-header img {
-    height: 60px;
   }
   
   .auth-header {

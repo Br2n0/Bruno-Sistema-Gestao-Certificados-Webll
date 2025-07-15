@@ -90,33 +90,23 @@ const router = createRouter({
     {
       path: '/admin/usuarios',
       name: 'admin-usuarios',
-      component: () => import('../views/configuracoes/IndexView.vue'), // Placeholder
+      component: () => import('../views/admin/UsuariosView.vue'),
       meta: { requiresAuth: true, requiresAdmin: true }
     },
     {
       path: '/admin/cursos',
       name: 'admin-cursos',
-      component: () => import('../views/configuracoes/IndexView.vue'), // Placeholder
+      component: () => import('../views/admin/CursosView.vue'),
       meta: { requiresAuth: true, requiresAdmin: true }
     },
-    {
-      path: '/admin/professores',
-      name: 'admin-professores',
-      component: () => import('../views/configuracoes/IndexView.vue'), // Placeholder
-      meta: { requiresAuth: true, requiresAdmin: true }
-    },
+
     {
       path: '/admin/certificados',
       name: 'admin-certificados',
-      component: () => import('../views/configuracoes/IndexView.vue'), // Placeholder
+      component: () => import('../views/admin/CertificadosView.vue'),
       meta: { requiresAuth: true, requiresAdmin: true }
     },
-    {
-      path: '/admin/configuracoes',
-      name: 'admin-configuracoes',
-      component: () => import('../views/configuracoes/IndexView.vue'), // Placeholder
-      meta: { requiresAuth: true, requiresAdmin: true }
-    },
+
     
     // 🔐 Autenticação
     {

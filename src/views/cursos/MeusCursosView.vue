@@ -27,39 +27,33 @@
 
     <!-- Conteúdo principal -->
     <div v-else>
-      <!-- Resumo estatístico -->
-      <div class="row mb-4">
-        <div class="col-md-4">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-              <div class="mb-2">
-                <i class="ti ti-trophy text-success fs-2"></i>
-              </div>
-              <h3 class="h4 mb-1 text-success">{{ cursosFinalizados.length }}</h3>
-              <p class="text-muted small mb-0">Cursos Concluídos</p>
-            </div>
+      <!-- Stats do Usuário -->
+      <div class="user-stats mb-4">
+        <div class="stat-card">
+          <div class="stat-icon bg-success">
+            <i class="ti ti-trophy"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ cursosFinalizados.length }}</span>
+            <span class="stat-title">Cursos Concluídos</span>
           </div>
         </div>
-        <div class="col-md-4">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-              <div class="mb-2">
-                <i class="ti ti-clock text-primary fs-2"></i>
-              </div>
-              <h3 class="h4 mb-1 text-primary">{{ cursosEmAndamento.length }}</h3>
-              <p class="text-muted small mb-0">Em Andamento</p>
-            </div>
+        <div class="stat-card">
+          <div class="stat-icon bg-primary">
+            <i class="ti ti-clock"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ cursosEmAndamento.length }}</span>
+            <span class="stat-title">Em Andamento</span>
           </div>
         </div>
-        <div class="col-md-4">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-              <div class="mb-2">
-                <i class="ti ti-clock-hour-4 text-warning fs-2"></i>
-              </div>
-              <h3 class="h4 mb-1 text-warning">{{ horasTotaisEstudadas }}</h3>
-              <p class="text-muted small mb-0">Horas Estudadas</p>
-            </div>
+        <div class="stat-card">
+          <div class="stat-icon bg-warning">
+            <i class="ti ti-clock-hour-4"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ horasTotaisEstudadas }}</span>
+            <span class="stat-title">Horas Estudadas</span>
           </div>
         </div>
       </div>
@@ -203,179 +197,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useAuth } from '@/composables/useAuth'
+import { useUserData } from '@/composables/useUserData'
 
 const { currentUser } = useAuth()
+const { 
+  cursosEmAndamento, 
+  certificadosObtidos, 
+  cursosFinalizados, 
+  loading,
+  horasTotaisEstudadas,
+  carregarDadosUsuario,
+  getAreaLabel,
+  formatarData 
+} = useUserData()
 
-// Estados reativos
-const loading = ref(true)
+// Estados locais
 const error = ref('')
-const matriculas = ref<any[]>([])
 
-// Dados dos cursos (mesmo da IndexView)
-const getCursosData = () => [
-  {
-    id: 1,
-    nome: 'Desenvolvimento Web com HTML5 e CSS3',
-    instrutor: 'Prof. Ana Silva',
-    duracao: 40,
-  },
-  {
-    id: 2,
-    nome: 'JavaScript Avançado e ES6+',
-    instrutor: 'Prof. Carlos Mendes',
-    duracao: 60,
-  },
-  {
-    id: 3,
-    nome: 'Desenvolvimento Full Stack com Vue.js e Node.js',
-    instrutor: 'Prof. Marina Costa',
-    duracao: 120,
-  },
-  {
-    id: 4,
-    nome: 'Banco de Dados SQL e NoSQL',
-    instrutor: 'Prof. Roberto Lima',
-    duracao: 80,
-  },
-  {
-    id: 5,
-    nome: 'Inteligência Artificial e Machine Learning',
-    instrutor: 'Prof. Fernanda Alves',
-    duracao: 160,
-  },
-  {
-    id: 6,
-    nome: 'DevOps e Integração Contínua',
-    instrutor: 'Prof. João Santos',
-    duracao: 90,
-  },
-  {
-    id: 7,
-    nome: 'Gestão Pública',
-    instrutor: 'Prof. Paula Rodrigues',
-    duracao: 80,
-  },
-  {
-    id: 8,
-    nome: 'Administração Financeira',
-    instrutor: 'Prof. André Martins',
-    duracao: 70,
-  },
-  {
-    id: 9,
-    nome: 'Recursos Humanos',
-    instrutor: 'Prof. Luciana Ferreira',
-    duracao: 60,
-  },
-  {
-    id: 10,
-    nome: 'Direito Constitucional',
-    instrutor: 'Prof. Ricardo Oliveira',
-    duracao: 100,
-  },
-  {
-    id: 11,
-    nome: 'Direito Administrativo',
-    instrutor: 'Prof. Beatriz Souza',
-    duracao: 120,
-  },
-  {
-    id: 12,
-    nome: 'Direito Civil',
-    instrutor: 'Prof. Gabriel Nascimento',
-    duracao: 90,
-  }
-]
+// Funções removidas - agora vêm do composable
 
-// Computed properties
-const cursosEmAndamento = computed(() => {
-  return matriculas.value
-    .filter(m => m.progresso > 0 && m.progresso < 100)
-    .map(matricula => {
-      const cursoData = getCursosData().find(c => c.id === matricula.cursoId)
-      return {
-        ...cursoData,
-        ...matricula,
-        titulo: cursoData?.nome || 'Curso não encontrado'
-      }
-    })
-})
-
-const cursosFinalizados = computed(() => {
-  return matriculas.value
-    .filter(m => m.progresso === 100)
-    .map(matricula => {
-      const cursoData = getCursosData().find(c => c.id === matricula.cursoId)
-      return {
-        ...cursoData,
-        ...matricula,
-        titulo: cursoData?.nome || 'Curso não encontrado'
-      }
-    })
-})
-
-const horasTotaisEstudadas = computed(() => {
-  return cursosFinalizados.value.reduce((total, curso) => {
-    return total + (curso.duracao || 0)
-  }, 0)
-})
-
-// Buscar matrículas do usuário
-const buscarMatriculas = async () => {
-  try {
-    loading.value = true
-    
-    if (!currentUser.value?.id) {
-      error.value = 'Usuário não autenticado'
-      return
-    }
-
-    // Simular carregamento
-    await new Promise(resolve => setTimeout(resolve, 500))
-
-    // Buscar todas as matrículas do localStorage
-    const matriculasEncontradas: any[] = []
-    
-    // Percorrer todas as chaves do localStorage
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (key && key.startsWith(`matricula_`) && key.endsWith(`_${currentUser.value.id}`)) {
-        try {
-          const data = localStorage.getItem(key)
-          if (data) {
-            const matricula = JSON.parse(data)
-            matriculasEncontradas.push(matricula)
-          }
-        } catch (err) {
-          console.error('Erro ao parsear matrícula:', err)
-        }
-      }
-    }
-
-    matriculas.value = matriculasEncontradas
-    
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Erro ao carregar cursos'
-  } finally {
-    loading.value = false
-  }
-}
-
-// Formatação de data
-const formatarData = (dataISO: string) => {
-  try {
-    const data = new Date(dataISO)
-    return data.toLocaleDateString('pt-BR')
-  } catch {
-    return 'Data inválida'
-  }
-}
+// Funções removidas - agora vêm do composable
 
 // Inicializar
 onMounted(() => {
-  buscarMatriculas()
+  carregarDadosUsuario()
 })
 </script>
 
@@ -405,7 +252,7 @@ onMounted(() => {
 }
 
 .curso-concluido {
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background: white;
   border-left: 4px solid #28a745;
 }
 
@@ -468,5 +315,74 @@ onMounted(() => {
 
 .curso-card {
   animation: fadeInUp 0.5s ease-out;
+}
+
+/* Stats do Usuário */
+.user-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: white;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+  color: #2d3748;
+}
+
+.stat-title {
+  font-size: 14px;
+  color: #718096;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .user-stats {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .stat-card {
+    padding: 20px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
 }
 </style> 

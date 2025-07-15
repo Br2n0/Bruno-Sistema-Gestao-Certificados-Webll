@@ -1,402 +1,503 @@
 <template>
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">
-            <i class="ti ti-users me-2"></i>Gerenciamento de Usuários
-          </h5>
-          <div class="card-tools">
-            <button @click="refreshUsers" class="btn btn-sm btn-outline-primary">
-              <i class="ti ti-refresh"></i>
-            </button>
+  <div class="container-fluid px-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+      <h1 class="h3 mb-0 text-gray-800">Gestão de Usuários</h1>
+      <button 
+        type="button" 
+        class="btn btn-primary"
+        @click="() => { editingUsuario = null; showUsuarioModal() }"
+      >
+        <i class="fas fa-plus fa-sm text-white-50"></i>
+        Novo Usuário
+      </button>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row mb-4">
+      <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+          <div class="card-body">
+            <div class="row no-gutters align-items-center">
+              <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                  Total de Usuários
+                </div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ usuarios.length }}</div>
+              </div>
+              <div class="col-auto">
+                <i class="fas fa-users fa-2x text-gray-300"></i>
+              </div>
+            </div>
           </div>
         </div>
-        
-        <div class="card-body">
-          <!-- Estatísticas -->
-          <div class="row mb-4">
-            <div class="col-md-3">
-              <div class="card bg-primary text-white">
-                <div class="card-body">
-                  <div class="d-flex justify-content-between">
-                    <div>
-                      <h6 class="card-title">Total de Usuários</h6>
-                      <h3 class="mb-0">{{ stats.totalUsers }}</h3>
-                    </div>
-                    <div class="align-self-center">
-                      <i class="ti ti-users fs-2"></i>
-                    </div>
-                  </div>
+      </div>
+      
+      <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+          <div class="card-body">
+            <div class="row no-gutters align-items-center">
+              <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                  Usuários Ativos
                 </div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ usuariosAtivos }}</div>
               </div>
-            </div>
-            <div class="col-md-3">
-              <div class="card bg-success text-white">
-                <div class="card-body">
-                  <div class="d-flex justify-content-between">
-                    <div>
-                      <h6 class="card-title">Usuários Ativos</h6>
-                      <h3 class="mb-0">{{ stats.activeUsers }}</h3>
-                    </div>
-                    <div class="align-self-center">
-                      <i class="ti ti-user-check fs-2"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="card bg-warning text-white">
-                <div class="card-body">
-                  <div class="d-flex justify-content-between">
-                    <div>
-                      <h6 class="card-title">Administradores</h6>
-                      <h3 class="mb-0">{{ stats.admins }}</h3>
-                    </div>
-                    <div class="align-self-center">
-                      <i class="ti ti-shield fs-2"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="card bg-info text-white">
-                <div class="card-body">
-                  <div class="d-flex justify-content-between">
-                    <div>
-                      <h6 class="card-title">Super Admins</h6>
-                      <h3 class="mb-0">{{ stats.superAdmins }}</h3>
-                    </div>
-                    <div class="align-self-center">
-                      <i class="ti ti-crown fs-2"></i>
-                    </div>
-                  </div>
-                </div>
+              <div class="col-auto">
+                <i class="fas fa-user-check fa-2x text-gray-300"></i>
               </div>
             </div>
           </div>
-
-          <!-- Filtros -->
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <div class="input-group">
-                <span class="input-group-text">
-                  <i class="ti ti-search"></i>
-                </span>
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="Buscar usuários..."
-                  v-model="searchTerm"
-                >
+        </div>
+      </div>
+      
+      <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+          <div class="card-body">
+            <div class="row no-gutters align-items-center">
+              <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                  Instrutores
+                </div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalInstrutores }}</div>
+              </div>
+              <div class="col-auto">
+                <i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i>
               </div>
             </div>
-            <div class="col-md-3">
-              <select class="form-select" v-model="roleFilter">
-                <option value="">Todos os tipos</option>
-                <option value="user">Usuários</option>
-                <option value="admin">Administradores</option>
-                <option value="super-admin">Super Admins</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <select class="form-select" v-model="statusFilter">
-                <option value="">Todos os status</option>
-                <option value="active">Ativos</option>
-                <option value="inactive">Inativos</option>
-              </select>
-            </div>
           </div>
-
-          <!-- Tabela de usuários -->
-          <div class="table-responsive">
-            <table class="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th>Usuário</th>
-                  <th>E-mail</th>
-                  <th>Telefone</th>
-                  <th>Tipo</th>
-                  <th>Status</th>
-                  <th>Último Login</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="user in filteredUsers" :key="user.id">
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <div class="avatar-sm me-3">
-                        <span class="avatar-title rounded-circle bg-primary">
-                          {{ user.nome.charAt(0).toUpperCase() }}
-                        </span>
-                      </div>
-                      <div>
-                        <h6 class="mb-0">{{ user.nome }}</h6>
-                        <small class="text-muted">ID: {{ user.id }}</small>
-                      </div>
-                    </div>
-                  </td>
-                  <td>{{ user.email }}</td>
-                  <td>{{ user.telefone || '-' }}</td>
-                  <td>
-                    <span class="badge" :class="getRoleBadgeClass(user.role)">
-                      {{ getRoleLabel(user.role) }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="badge" :class="user.isActive ? 'bg-success' : 'bg-danger'">
-                      {{ user.isActive ? 'Ativo' : 'Inativo' }}
-                    </span>
-                  </td>
-                  <td>
-                    <small>{{ formatDate(user.lastLogin) }}</small>
-                  </td>
-                  <td>
-                    <div class="btn-group btn-group-sm">
-                      <!-- Botão para promover/rebaixar -->
-                      <div class="dropdown">
-                        <button
-                          class="btn btn-outline-primary dropdown-toggle"
-                          type="button"
-                          :disabled="user.id === currentUser?.id"
-                          data-bs-toggle="dropdown"
-                        >
-                          <i class="ti ti-settings"></i>
-                        </button>
-                        <ul class="dropdown-menu">
-                          <li v-if="user.role === 'user'">
-                            <a class="dropdown-item" href="#" @click="promoteUser(user.id, 'admin')">
-                              <i class="ti ti-arrow-up me-2"></i>Promover para Admin
-                            </a>
-                          </li>
-                          <li v-if="user.role === 'admin' && isSuperAdmin">
-                            <a class="dropdown-item" href="#" @click="promoteUser(user.id, 'user')">
-                              <i class="ti ti-arrow-down me-2"></i>Rebaixar para Usuário
-                            </a>
-                          </li>
-                          <li><hr class="dropdown-divider"></li>
-                          <li v-if="user.isActive">
-                            <a class="dropdown-item text-danger" href="#" @click="deactivateUser(user.id)">
-                              <i class="ti ti-user-off me-2"></i>Desativar
-                            </a>
-                          </li>
-                          <li v-else>
-                            <a class="dropdown-item text-success" href="#" @click="activateUser(user.id)">
-                              <i class="ti ti-user-check me-2"></i>Ativar
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Paginação (se necessário) -->
-          <div v-if="filteredUsers.length === 0" class="text-center py-4">
-            <i class="ti ti-users-off fs-1 text-muted"></i>
-            <h6 class="text-muted mt-2">Nenhum usuário encontrado</h6>
+        </div>
+      </div>
+      
+      <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+          <div class="card-body">
+            <div class="row no-gutters align-items-center">
+              <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                  Alunos
+                </div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalAlunos }}</div>
+              </div>
+              <div class="col-auto">
+                <i class="fas fa-graduation-cap fa-2x text-gray-300"></i>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Toast para feedback -->
-  <div
-    ref="toastRef"
-    class="toast position-fixed top-0 end-0 m-3"
-    role="alert"
-    :class="{ 'show': showToast }"
-    style="z-index: 1060;"
-  >
-    <div class="toast-header">
-      <i class="ti ti-check-circle text-success me-2"></i>
-      <strong class="me-auto">Sucesso</strong>
-      <button type="button" class="btn-close" @click="showToast = false"></button>
+    <!-- Tabela de Usuários -->
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Lista de Usuários</h6>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered" width="100%" cellspacing="0">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>CPF</th>
+                <th>Tipo</th>
+                <th>Status</th>
+                <th>Data Registro</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="usuario in usuarios" :key="usuario.id">
+                <td>{{ usuario.id }}</td>
+                <td>{{ usuario.nome }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>{{ usuario.cpf }}</td>
+                <td>
+                  <span :class="['badge', getTipoBadgeClass(usuario.tipo)]">
+                    {{ getTipoLabel(usuario.tipo) }}
+                  </span>
+                </td>
+                <td>
+                  <span :class="['badge', usuario.status === 'ativo' ? 'badge-success' : 'badge-secondary']">
+                    {{ usuario.status }}
+                  </span>
+                </td>
+                <td>{{ formatDate(usuario.dataRegistro) }}</td>
+                <td>
+                  <button 
+                    type="button"
+                    class="btn btn-info btn-sm me-2"
+                    @click="editUsuario(usuario)"
+                    title="Editar"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button 
+                    type="button"
+                    class="btn btn-danger btn-sm"
+                    @click="confirmDeleteUsuario(usuario)"
+                    title="Excluir"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    <div class="toast-body">
-      {{ toastMessage }}
+
+    <!-- Modal Usuário -->
+    <div class="modal fade" id="usuarioModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              {{ editingUsuario ? 'Editar Usuário' : 'Novo Usuário' }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="saveUsuario">
+              <div class="row">
+                <div class="col-md-8 mb-3">
+                  <label for="nome" class="form-label">Nome Completo *</label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    id="nome"
+                    v-model="usuarioForm.nome"
+                    required
+                  >
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="tipo" class="form-label">Tipo *</label>
+                  <select 
+                    class="form-control" 
+                    id="tipo"
+                    v-model="usuarioForm.tipo"
+                    required
+                  >
+                    <option value="">Selecione o tipo</option>
+                    <option value="admin">Administrador</option>
+                    <option value="instrutor">Instrutor</option>
+                    <option value="aluno">Aluno</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="email" class="form-label">Email *</label>
+                  <input 
+                    type="email" 
+                    class="form-control" 
+                    id="email"
+                    v-model="usuarioForm.email"
+                    required
+                  >
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="telefone" class="form-label">Telefone *</label>
+                  <input 
+                    type="tel" 
+                    class="form-control" 
+                    id="telefone"
+                    v-model="usuarioForm.telefone"
+                    placeholder="(11) 99999-9999"
+                    required
+                  >
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="cpf" class="form-label">CPF *</label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    id="cpf"
+                    v-model="usuarioForm.cpf"
+                    placeholder="000.000.000-00"
+                    required
+                  >
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="status" class="form-label">Status *</label>
+                  <select 
+                    class="form-control" 
+                    id="status"
+                    v-model="usuarioForm.status"
+                    required
+                  >
+                    <option value="ativo">Ativo</option>
+                    <option value="inativo">Inativo</option>
+                  </select>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Cancelar
+            </button>
+            <button type="button" class="btn btn-primary" @click="saveUsuario">
+              {{ editingUsuario ? 'Atualizar' : 'Salvar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Confirmação Delete -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirmar Exclusão</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p>Tem certeza que deseja excluir o usuário <strong>{{ usuarioToDelete?.nome }}</strong>?</p>
+            <p class="text-danger">Esta ação não pode ser desfeita.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Cancelar
+            </button>
+            <button type="button" class="btn btn-danger" @click="deleteUsuario">
+              Excluir
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useAuth } from '@/composables/useAuth'
-import type { User } from '@/types/auth'
+import { dataService, type Usuario } from '@/services/dataService'
+import { useBootstrap } from '@/composables/useBootstrap'
 
-// Composables
-const { 
-  currentUser, 
-  isSuperAdmin, 
-  getAllUsers, 
-  promoteUser: authPromoteUser, 
-  deactivateUser: authDeactivateUser,
-  activateUser: authActivateUser,
-  getStats
-} = useAuth()
+const { showModal, hideModal, createSimpleToast } = useBootstrap()
 
-// Estado
-const users = ref<User[]>([])
-const stats = ref({
-  totalUsers: 0,
-  activeUsers: 0,
-  admins: 0,
-  superAdmins: 0
-})
-const searchTerm = ref('')
-const roleFilter = ref('')
-const statusFilter = ref('')
-const showToast = ref(false)
-const toastMessage = ref('')
+// Estado reativo
+const usuarios = ref<Usuario[]>([])
+const editingUsuario = ref<Usuario | null>(null)
+const usuarioToDelete = ref<Usuario | null>(null)
 
-// Usuários filtrados
-const filteredUsers = computed(() => {
-  let filtered = users.value
-
-  // Filtrar por termo de busca
-  if (searchTerm.value) {
-    const term = searchTerm.value.toLowerCase()
-    filtered = filtered.filter(user => 
-      user.nome.toLowerCase().includes(term) || 
-      user.email.toLowerCase().includes(term)
-    )
-  }
-
-  // Filtrar por tipo de usuário
-  if (roleFilter.value) {
-    filtered = filtered.filter(user => user.role === roleFilter.value)
-  }
-
-  // Filtrar por status
-  if (statusFilter.value) {
-    filtered = filtered.filter(user => 
-      statusFilter.value === 'active' ? user.isActive : !user.isActive
-    )
-  }
-
-  return filtered
+// Formulário reativo
+const usuarioForm = ref({
+  nome: '',
+  email: '',
+  cpf: '',
+  telefone: '',
+  tipo: '' as 'admin' | 'aluno' | 'instrutor' | '',
+  status: 'ativo' as 'ativo' | 'inativo'
 })
 
-// Métodos
-const refreshUsers = () => {
+// Computed properties para estatísticas
+const usuariosAtivos = computed(() => usuarios.value.filter(u => u.status === 'ativo').length)
+const totalInstrutores = computed(() => usuarios.value.filter(u => u.tipo === 'instrutor').length)
+const totalAlunos = computed(() => usuarios.value.filter(u => u.tipo === 'aluno').length)
+
+// Métodos auxiliares
+const getTipoLabel = (tipo: string) => {
+  const labels = {
+    admin: 'Administrador',
+    instrutor: 'Instrutor',
+    aluno: 'Aluno'
+  }
+  return labels[tipo as keyof typeof labels] || tipo
+}
+
+const getTipoBadgeClass = (tipo: string) => {
+  const classes = {
+    admin: 'badge-danger',
+    instrutor: 'badge-primary',
+    aluno: 'badge-success'
+  }
+  return classes[tipo as keyof typeof classes] || 'badge-secondary'
+}
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('pt-BR')
+}
+
+// Métodos principais
+const loadUsuarios = () => {
   try {
-    users.value = getAllUsers()
-    stats.value = getStats()
+    usuarios.value = dataService.getUsuarios()
   } catch (error) {
     console.error('Erro ao carregar usuários:', error)
+    createSimpleToast('Erro ao carregar usuários', 'danger')
   }
 }
 
-const promoteUser = (userId: string, newRole: 'user' | 'admin') => {
+const resetForm = () => {
+  usuarioForm.value = {
+    nome: '',
+    email: '',
+    cpf: '',
+    telefone: '',
+    tipo: '',
+    status: 'ativo'
+  }
+}
+
+const showUsuarioModal = () => {
+  if (!editingUsuario.value) {
+    resetForm()
+  }
+  showModal('usuarioModal')
+}
+
+const editUsuario = (usuario: Usuario) => {
+  editingUsuario.value = usuario
+  usuarioForm.value = {
+    nome: usuario.nome,
+    email: usuario.email,
+    cpf: usuario.cpf,
+    telefone: usuario.telefone,
+    tipo: usuario.tipo,
+    status: usuario.status
+  }
+  showUsuarioModal()
+}
+
+const saveUsuario = () => {
+  if (!usuarioForm.value.tipo) {
+    createSimpleToast('Por favor, selecione o tipo de usuário', 'danger')
+    return
+  }
+
   try {
-    const updatedUser = authPromoteUser(userId, newRole)
-    if (updatedUser) {
-      refreshUsers()
-      showToastMessage(`Usuário ${newRole === 'admin' ? 'promovido' : 'rebaixado'} com sucesso!`)
+    if (editingUsuario.value) {
+      // Atualizar usuário existente
+      const updated = dataService.updateUsuario(editingUsuario.value.id, {
+        nome: usuarioForm.value.nome,
+        email: usuarioForm.value.email,
+        cpf: usuarioForm.value.cpf,
+        telefone: usuarioForm.value.telefone,
+        tipo: usuarioForm.value.tipo as 'admin' | 'aluno' | 'instrutor',
+        status: usuarioForm.value.status
+      })
+      
+      if (updated) {
+        createSimpleToast('Usuário atualizado com sucesso!', 'success')
+      } else {
+        createSimpleToast('Erro ao atualizar usuário', 'danger')
+        return
+      }
+    } else {
+      // Criar novo usuário
+      const newUsuario = dataService.addUsuario({
+        nome: usuarioForm.value.nome,
+        email: usuarioForm.value.email,
+        cpf: usuarioForm.value.cpf,
+        telefone: usuarioForm.value.telefone,
+        tipo: usuarioForm.value.tipo as 'admin' | 'aluno' | 'instrutor',
+        status: usuarioForm.value.status
+      })
+      
+      createSimpleToast('Usuário criado com sucesso!', 'success')
     }
+    
+    // Recarregar dados e fechar modal
+    loadUsuarios()
+    hideModal('usuarioModal')
+    resetForm()
+    editingUsuario.value = null
+    
   } catch (error) {
-    console.error('Erro ao promover usuário:', error)
-    showToastMessage('Erro ao alterar usuário', 'error')
+    console.error('Erro ao salvar usuário:', error)
+    createSimpleToast('Erro ao salvar usuário', 'danger')
   }
 }
 
-const deactivateUser = (userId: string) => {
-  try {
-    const updatedUser = authDeactivateUser(userId)
-    if (updatedUser) {
-      refreshUsers()
-      showToastMessage('Usuário desativado com sucesso!')
-    }
-  } catch (error) {
-    console.error('Erro ao desativar usuário:', error)
-    showToastMessage('Erro ao desativar usuário', 'error')
-  }
+const confirmDeleteUsuario = (usuario: Usuario) => {
+  usuarioToDelete.value = usuario
+  showModal('deleteModal')
 }
 
-const activateUser = (userId: string) => {
-  try {
-    const updatedUser = authActivateUser(userId)
-    if (updatedUser) {
-      refreshUsers()
-      showToastMessage('Usuário ativado com sucesso!')
-    }
-  } catch (error) {
-    console.error('Erro ao ativar usuário:', error)
-    showToastMessage('Erro ao ativar usuário', 'error')
-  }
-}
-
-const showToastMessage = (message: string, type: 'success' | 'error' = 'success') => {
-  toastMessage.value = message
-  showToast.value = true
+const deleteUsuario = () => {
+  if (!usuarioToDelete.value) return
   
-  setTimeout(() => {
-    showToast.value = false
-  }, 3000)
-}
-
-const getRoleBadgeClass = (role: string) => {
-  switch (role) {
-    case 'super-admin': return 'bg-danger'
-    case 'admin': return 'bg-warning'
-    default: return 'bg-secondary'
+  try {
+    const success = dataService.deleteUsuario(usuarioToDelete.value.id)
+    
+    if (success) {
+      createSimpleToast('Usuário excluído com sucesso!', 'success')
+      loadUsuarios()
+    } else {
+      createSimpleToast('Erro ao excluir usuário', 'danger')
+    }
+    
+    hideModal('deleteModal')
+    usuarioToDelete.value = null
+    
+  } catch (error) {
+    console.error('Erro ao excluir usuário:', error)
+    createSimpleToast('Erro ao excluir usuário', 'danger')
   }
 }
 
-const getRoleLabel = (role: string) => {
-  switch (role) {
-    case 'super-admin': return 'Super Admin'
-    case 'admin': return 'Admin'
-    default: return 'Usuário'
-  }
-}
-
-const formatDate = (date?: Date) => {
-  if (!date) return 'Nunca'
-  return new Date(date).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-// Inicializar
+// Lifecycle
 onMounted(() => {
-  refreshUsers()
+  loadUsuarios()
 })
 </script>
 
 <style scoped>
-.avatar-sm {
-  width: 40px;
-  height: 40px;
+.badge-success {
+  background-color: #28a745;
 }
 
-.avatar-title {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
+.badge-secondary {
+  background-color: #6c757d;
 }
 
-.toast.show {
-  display: block;
+.badge-primary {
+  background-color: #007bff;
 }
 
-.table th {
-  border-top: none;
-  font-weight: 600;
-  color: #495057;
+.badge-danger {
+  background-color: #dc3545;
+}
+
+.border-left-primary {
+  border-left: 0.25rem solid #4e73df !important;
+}
+
+.border-left-success {
+  border-left: 0.25rem solid #1cc88a !important;
+}
+
+.border-left-warning {
+  border-left: 0.25rem solid #f6c23e !important;
+}
+
+.border-left-info {
+  border-left: 0.25rem solid #36b9cc !important;
+}
+
+.text-primary {
+  color: #4e73df !important;
+}
+
+.text-success {
+  color: #1cc88a !important;
+}
+
+.text-warning {
+  color: #f6c23e !important;
+}
+
+.text-info {
+  color: #36b9cc !important;
 }
 </style> 

@@ -112,16 +112,7 @@
               </router-link>
             </li>
             
-            <li class="pc-item">
-              <router-link 
-                to="/admin/professores" 
-                class="pc-link admin-link"
-                :title="isCollapsed ? 'Gestão de Professores' : ''"
-                @click="closeMobileMenu"
-              >
-                <span class="pc-mtext">Gestão de Professores</span>
-              </router-link>
-            </li>
+
             
             <li class="pc-item">
               <router-link 
@@ -133,17 +124,7 @@
                 <span class="pc-mtext">Gestão de Certificados</span>
               </router-link>
             </li>
-            
-            <li class="pc-item">
-              <router-link 
-                to="/admin/configuracoes" 
-                class="pc-link admin-link"
-                :title="isCollapsed ? 'Configurações do Sistema' : ''"
-                @click="closeMobileMenu"
-              >
-                <span class="pc-mtext">Configurações do Sistema</span>
-              </router-link>
-            </li>
+
           </template>
 
 
@@ -263,12 +244,12 @@ const closeMobileMenu = () => {
 
 .pc-link:hover {
   background-color: #f3f4f6;
-  color: #4f46e5;
+  color: #2c3cdc;
   text-decoration: none;
 }
 
 .pc-link.router-link-active {
-  background-color: #4f46e5;
+  background-color: #2c3cdc;
   color: white;
 }
 

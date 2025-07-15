@@ -1,0 +1,12 @@
+# Arquivo .cursorignore configurado para permitir leitura do .env
+# Comentada a linha abaixo para permitir que o Cursor leia as configurações
+# .env
+
+# Manter outros arquivos ignorados por segurança
+node_modules/
+dist/
+build/
+.git/
+*.log
+.DS_Store
+Thumbs.db 

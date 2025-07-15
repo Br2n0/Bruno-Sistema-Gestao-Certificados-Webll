@@ -145,6 +145,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import apiService from '@/services/apiService'
 
 interface Atividade {
   data: string
@@ -175,67 +176,46 @@ export default defineComponent({
       certificado: null as Certificado | null,
     }
   },
-  created() {
-    // Simulando carregamento de dados
-    setTimeout(() => {
-      this.carregarCertificado(Number(this.$route.params.id))
-      this.isLoading = false
-    }, 1000)
+  async created() {
+    await this.carregarCertificado(Number(this.$route.params.id))
+    this.isLoading = false
   },
   methods: {
-    carregarCertificado(id: number) {
-      // Aqui seria uma chamada à API para buscar dados do certificado
-      // Por enquanto, usamos dados mockados
-      this.certificado = {
-        id: id,
-        nome: 'Desenvolvimento Full Stack com Vue.js e Node.js',
-        area: 'Desenvolvimento Web',
-        duracao: 120,
-        nivel: 'Avançado',
-        disponivel: true,
-        descricao: 'Este certificado atesta a capacidade do participante em desenvolver aplicações web completas utilizando Vue.js no frontend e Node.js no backend, com conhecimentos em bancos de dados, autenticação e segurança.',
-        codigo: 'CERT-' + Math.floor(100000 + Math.random() * 900000),
-        dataEmissao: '15/06/2023',
-        validade: 'Indeterminada',
-        conteudo: [
-          'Introdução ao Vue.js 3 e Composition API',
-          'Desenvolvimento de interfaces responsivas',
-          'Gerenciamento de estado com Vuex',
-          'Rotas e navegação com Vue Router',
-          'Node.js e Express para API RESTful',
-          'Autenticação e autorização com JWT',
-          'Integração com bancos de dados SQL e NoSQL',
-          'Deploy e configuração em ambientes de produção',
-          'Testes unitários e de integração',
-          'Boas práticas e performance',
-        ],
-        atividades: [
-          {
-            data: '15/05/2023',
-            descricao: 'Inscrição no curso',
-            status: 'Concluído',
-          },
-          {
-            data: '01/06/2023',
-            descricao: 'Conclusão do módulo 1',
-            status: 'Concluído',
-          },
-          {
-            data: '08/06/2023',
-            descricao: 'Conclusão do módulo 2',
-            status: 'Concluído',
-          },
-          {
-            data: '15/06/2023',
-            descricao: 'Avaliação final',
-            status: 'Aprovado',
-          },
-          {
-            data: '15/06/2023',
-            descricao: 'Emissão do certificado',
-            status: 'Concluído',
-          },
-        ],
+    async carregarCertificado(id: number) {
+      try {
+        // Buscar certificado da API
+        const certificado = await apiService.getCertificado(id)
+        
+        if (certificado) {
+          this.certificado = {
+            id: certificado.ID,
+            nome: certificado.CursoTitulo,
+            area: 'Desenvolvimento Web', // Campo não disponível na API ainda
+            duracao: 40, // Valor padrão - deve vir do curso
+            nivel: 'Intermediário', // Campo não disponível na API ainda
+            disponivel: true,
+            descricao: 'Este certificado atesta a conclusão bem-sucedida do curso.',
+            codigo: certificado.Codigo_Validacao,
+            dataEmissao: new Date(certificado.Data_Emissao).toLocaleDateString('pt-BR'),
+            validade: 'Indeterminada',
+            conteudo: [
+              'Módulo 1: Fundamentos',
+              'Módulo 2: Desenvolvimento Prático', 
+              'Módulo 3: Projeto Final',
+              'Avaliações e Certificação'
+            ],
+            atividades: [
+              {
+                data: new Date(certificado.Data_Emissao).toLocaleDateString('pt-BR'),
+                descricao: 'Certificado emitido',
+                status: 'Concluído',
+              }
+            ],
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar certificado:', error)
+        this.certificado = null
       }
     },
     getBadgeColor(nivel: string): string {

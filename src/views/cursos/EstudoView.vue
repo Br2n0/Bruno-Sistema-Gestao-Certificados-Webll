@@ -1,239 +1,166 @@
 <template>
   <div class="estudo-container">
-    <!-- Breadcrumb minimalista -->
-    <nav aria-label="breadcrumb" class="mb-4">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-          <router-link to="/cursos" class="text-decoration-none text-primary">
-            <i class="ti ti-book me-1"></i>Cursos
-          </router-link>
-        </li>
-        <li class="breadcrumb-item active text-muted">
-          {{ curso?.titulo || 'Carregando...' }}
-        </li>
-      </ol>
-    </nav>
-
-    <!-- Estado de carregamento -->
+    <!-- Loading State -->
     <div v-if="loading" class="text-center py-5">
       <div class="spinner-border text-primary mb-3"></div>
-      <p class="text-muted">Carregando ambiente de estudos...</p>
+      <p class="text-muted">Carregando curso...</p>
     </div>
 
-    <!-- Erro -->
+    <!-- Error State -->
     <div v-else-if="error" class="alert alert-danger">
       <i class="ti ti-alert-circle me-2"></i>{{ error }}
     </div>
 
-    <!-- Ambiente Virtual de Estudos -->
-    <div v-else-if="curso" class="ambiente-virtual">
-      
+    <!-- Main Content -->
+    <div v-else-if="curso">
       <!-- Header do Curso -->
       <div class="curso-header mb-4">
         <div class="row align-items-center">
-          <div class="col-md-8">
-            <h1 class="h4 mb-2 text-dark">{{ curso.titulo }}</h1>
+          <div class="col">
+            <h1 class="h3 mb-2">{{ curso.titulo }}</h1>
             <div class="curso-meta">
-              <span class="me-3">
-                <i class="ti ti-user text-primary me-1"></i>
-                {{ curso.instrutor || 'Instrutor não informado' }}
-              </span>
-              <span class="me-3">
-                <i class="ti ti-clock text-primary me-1"></i>
-                {{ curso.duracao }}h
-              </span>
-              <span v-if="curso.preco > 0">
-                <i class="ti ti-currency-real text-primary me-1"></i>
-                R$ {{ curso.preco.toFixed(2) }}
-              </span>
-              <span v-else class="text-success">
-                <i class="ti ti-gift me-1"></i>Gratuito
+              <span class="badge bg-primary me-2">{{ curso.duracao }}h</span>
+              <span class="text-muted" v-if="curso.instrutor">
+                <i class="ti ti-user me-1"></i>{{ curso.instrutor }}
               </span>
             </div>
           </div>
-          <div class="col-md-4 text-md-end">
-            <div class="progresso-geral">
-              <small class="text-muted d-block mb-1">Seu progresso</small>
-              <div class="progress mb-2" style="height: 8px;">
-                <div 
-                  class="progress-bar bg-primary" 
-                  :style="{ width: progresso + '%' }"
-                ></div>
-              </div>
-              <small class="text-primary fw-medium">{{ progresso }}% concluído</small>
-            </div>
+          <div class="col-auto">
+            <router-link to="/cursos" class="btn btn-outline-secondary">
+              <i class="ti ti-arrow-left me-2"></i>Voltar aos Cursos
+            </router-link>
           </div>
         </div>
       </div>
 
-      <!-- Área Principal de Estudos -->
+      <!-- Progresso Geral -->
+      <div class="progresso-geral mb-4" v-if="matriculado">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="fw-medium">Progresso do Curso</span>
+          <span class="text-primary fw-bold">{{ progresso }}%</span>
+        </div>
+        <div class="progress" style="height: 8px;">
+          <div 
+            class="progress-bar bg-primary" 
+            :style="{ width: progresso + '%' }"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Ambiente Principal -->
       <div class="ambiente-principal">
-        
-        <!-- Mensagem de Matrícula -->
-        <div v-if="!matriculado" class="card border-0 shadow-sm">
-          <div class="card-body text-center py-5">
-            <div class="mb-4">
-              <i class="ti ti-school display-4 text-primary"></i>
-            </div>
-            <h3 class="h5 mb-3">Iniciar Jornada de Aprendizado</h3>
-            <p class="text-muted mb-4">
-              Você será automaticamente matriculado para começar seus estudos neste curso.
-            </p>
-            <button 
-              class="btn btn-primary btn-lg px-4"
-              @click="iniciarCurso"
-              :disabled="iniciando"
-            >
-              <span v-if="iniciando" class="spinner-border spinner-border-sm me-2"></span>
-              <i v-else class="ti ti-play me-2"></i>
-              {{ iniciando ? 'Iniciando...' : 'Começar Agora' }}
-            </button>
+        <!-- Não Matriculado -->
+        <div v-if="!matriculado" class="text-center py-5">
+          <div class="mb-4">
+            <i class="ti ti-lock-open display-1 text-primary mb-3"></i>
+            <h3>Iniciar Curso</h3>
+            <p class="text-muted mb-4">{{ curso.descricao }}</p>
           </div>
+          <button 
+            class="btn btn-primary btn-lg" 
+            @click="iniciarCurso"
+            :disabled="iniciando"
+          >
+            <span v-if="iniciando" class="spinner-border spinner-border-sm me-2"></span>
+            <i v-else class="ti ti-play me-2"></i>
+            {{ iniciando ? 'Matriculando...' : 'Iniciar Curso Gratuito' }}
+          </button>
         </div>
 
-        <!-- Módulos do Curso -->
+        <!-- Matriculado - Módulos do Curso -->
         <div v-else class="modulos-container">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="h5 mb-0">Módulos do Curso</h3>
-            <small class="text-muted">{{ getModulosConcluidos() }}/3 módulos concluídos</small>
-          </div>
-
-          <!-- Lista de Módulos -->
-          <div class="modulos-list">
-            
-            <!-- Módulo 1 -->
-            <div class="modulo-card mb-3" :class="{ 'modulo-ativo': progresso >= 0 && progresso < 33 }">
-              <div class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                  <div class="d-flex align-items-center">
-                    <div class="modulo-status me-3">
-                      <i v-if="progresso > 33" class="ti ti-check-circle text-success fs-4"></i>
-                      <i v-else-if="progresso > 0" class="ti ti-play-circle text-primary fs-4"></i>
-                      <i v-else class="ti ti-circle-dashed text-muted fs-4"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                      <h4 class="h6 mb-1">Módulo 1: Fundamentos</h4>
-                      <p class="text-muted small mb-0">Conceitos básicos e introdução ao tema principal</p>
-                    </div>
-                    <div class="modulo-badge">
-                      <span v-if="progresso > 33" class="badge bg-success">Concluído</span>
-                      <span v-else-if="progresso > 0" class="badge bg-primary">Em andamento</span>
-                      <span v-else class="badge bg-light text-muted">Não iniciado</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Módulo 2 -->
-            <div class="modulo-card mb-3" :class="{ 'modulo-ativo': progresso >= 33 && progresso < 66 }">
-              <div class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                  <div class="d-flex align-items-center">
-                    <div class="modulo-status me-3">
-                      <i v-if="progresso > 66" class="ti ti-check-circle text-success fs-4"></i>
-                      <i v-else-if="progresso >= 33" class="ti ti-play-circle text-primary fs-4"></i>
-                      <i v-else class="ti ti-lock text-muted fs-4"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                      <h4 class="h6 mb-1">Módulo 2: Desenvolvimento</h4>
-                      <p class="text-muted small mb-0">Aplicação prática dos conceitos aprendidos</p>
-                    </div>
-                    <div class="modulo-badge">
-                      <span v-if="progresso > 66" class="badge bg-success">Concluído</span>
-                      <span v-else-if="progresso >= 33" class="badge bg-primary">Em andamento</span>
-                      <span v-else class="badge bg-light text-muted">Bloqueado</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Módulo 3 -->
-            <div class="modulo-card mb-4" :class="{ 'modulo-ativo': progresso >= 66 && progresso < 100 }">
-              <div class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                  <div class="d-flex align-items-center">
-                    <div class="modulo-status me-3">
-                      <i v-if="progresso === 100" class="ti ti-check-circle text-success fs-4"></i>
-                      <i v-else-if="progresso >= 66" class="ti ti-play-circle text-primary fs-4"></i>
-                      <i v-else class="ti ti-lock text-muted fs-4"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                      <h4 class="h6 mb-1">Módulo 3: Projeto Final</h4>
-                      <p class="text-muted small mb-0">Consolidação e certificação dos conhecimentos</p>
-                    </div>
-                    <div class="modulo-badge">
-                      <span v-if="progresso === 100" class="badge bg-success">Concluído</span>
-                      <span v-else-if="progresso >= 66" class="badge bg-primary">Em andamento</span>
-                      <span v-else class="badge bg-light text-muted">Bloqueado</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Controles de Ação -->
-            <div class="acoes-curso text-center">
-              
-              <!-- Botão Continuar -->
-              <div v-if="progresso < 100" class="mb-3">
-                <button 
-                  class="btn btn-primary btn-lg px-5"
-                  @click="avancarProgresso"
-                  :disabled="atualizandoProgresso"
+          <h4 class="mb-4">Conteúdo do Curso</h4>
+          
+          <div class="row">
+            <div class="col-md-8">
+              <!-- Módulos -->
+              <div class="mb-4">
+                <div 
+                  v-for="(modulo, index) in modulos" 
+                  :key="index"
+                  class="modulo-card mb-3"
+                  :class="{ 'modulo-ativo': index === moduloAtivo }"
                 >
-                  <span v-if="atualizandoProgresso" class="spinner-border spinner-border-sm me-2"></span>
-                  <i v-else class="ti ti-play me-2"></i>
-                                     {{ getTextoAcao }}
-                </button>
-                <p class="text-muted small mt-2 mb-0">
-                  Clique para simular o progresso do módulo atual
-                </p>
-              </div>
-
-              <!-- Finalizar Curso -->
-              <div v-if="progresso === 100 && !certificadoGerado" class="mb-3">
-                <button 
-                  class="btn btn-success btn-lg px-5"
-                  @click="finalizarCurso"
-                  :disabled="finalizando"
-                >
-                  <span v-if="finalizando" class="spinner-border spinner-border-sm me-2"></span>
-                  <i v-else class="ti ti-certificate me-2"></i>
-                  {{ finalizando ? 'Gerando certificado...' : 'Finalizar e Certificar' }}
-                </button>
-                <p class="text-success small mt-2 mb-0">
-                  <i class="ti ti-trophy me-1"></i>
-                  Parabéns! Você está pronto para obter seu certificado
-                </p>
-              </div>
-
-              <!-- Certificado Gerado -->
-              <div v-if="certificadoGerado" class="certificado-sucesso">
-                <div class="alert alert-success border-0 shadow-sm">
-                  <div class="text-center">
-                    <i class="ti ti-trophy display-5 text-success mb-3"></i>
-                    <h4 class="alert-heading h5">Curso Concluído com Sucesso!</h4>
-                    <p class="mb-3">
-                      Seu certificado foi gerado automaticamente e está disponível para download.
-                    </p>
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                      <router-link 
-                        to="/certificados" 
-                        class="btn btn-outline-primary"
-                      >
-                        <i class="ti ti-eye me-2"></i>
-                        Ver Meus Certificados
-                      </router-link>
-                      <button 
-                        class="btn btn-primary"
-                        @click="baixarCertificado"
-                      >
-                        <i class="ti ti-download me-2"></i>
-                        Baixar Certificado
-                      </button>
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <h6 class="mb-1">{{ modulo.titulo }}</h6>
+                          <p class="text-muted mb-0 small">{{ modulo.descricao }}</p>
+                        </div>
+                        <div class="modulo-status">
+                          <span 
+                            class="badge modulo-badge"
+                            :class="getBadgeClass(modulo.status)"
+                          >
+                            {{ getStatusLabel(modulo.status) }}
+                          </span>
+                        </div>
+                      </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ações -->
+              <div class="acoes-curso">
+                <div class="d-flex gap-3">
+                  <button 
+                    v-if="progresso < 100"
+                    class="btn btn-primary"
+                    @click="avancarProgresso"
+                    :disabled="atualizandoProgresso"
+                  >
+                    <span v-if="atualizandoProgresso" class="spinner-border spinner-border-sm me-2"></span>
+                    <i v-else class="ti ti-player-play me-2"></i>
+                    {{ getProximaAcaoLabel }}
+                  </button>
+
+                  <button 
+                    v-if="progresso === 100 && !certificadoGerado"
+                    class="btn btn-success"
+                    @click="finalizarCurso"
+                    :disabled="finalizando"
+                  >
+                    <span v-if="finalizando" class="spinner-border spinner-border-sm me-2"></span>
+                    <i v-else class="ti ti-certificate me-2"></i>
+                    {{ finalizando ? 'Gerando...' : 'Gerar Certificado' }}
+                  </button>
+
+                  <router-link 
+                    v-if="certificadoGerado"
+                    to="/certificados"
+                    class="btn btn-success"
+                  >
+                    <i class="ti ti-certificate me-2"></i>
+                    Ver Certificado
+                  </router-link>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sidebar Info -->
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-header">
+                  <h6 class="mb-0">Informações do Curso</h6>
+                </div>
+                <div class="card-body">
+                  <div class="info-item mb-3">
+                    <i class="ti ti-clock text-primary me-2"></i>
+                    <span>{{ curso.duracao }} horas</span>
+                  </div>
+                  <div class="info-item mb-3" v-if="curso.instrutor">
+                    <i class="ti ti-user text-primary me-2"></i>
+                    <span>{{ curso.instrutor }}</span>
+                  </div>
+                  <div class="info-item mb-3">
+                    <i class="ti ti-certificate text-primary me-2"></i>
+                    <span>Certificado Incluído</span>
+                  </div>
+                  <div class="info-item">
+                    <i class="ti ti-device-mobile text-primary me-2"></i>
+                    <span>Acesso Mobile</span>
                   </div>
                 </div>
               </div>
@@ -246,192 +173,158 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
-
-const route = useRoute()
-const router = useRouter()
-const { currentUser } = useAuth()
+import apiService, { StatusMatricula } from '@/services/apiService'
+import type { CursoDTO, MatriculaDTO } from '@/services/apiService'
 
 // Estados reativos
-const loading = ref(true)
+const curso = ref<{
+  id: number
+  titulo: string
+  descricao: string
+  instrutor: string
+  duracao: number
+} | null>(null)
+
+const matricula = ref<MatriculaDTO | null>(null)
+const loading = ref(false)
 const error = ref('')
-const curso = ref<any>(null)
-const matriculado = ref(false)
-const progresso = ref(0)
 const iniciando = ref(false)
 const atualizandoProgresso = ref(false)
 const finalizando = ref(false)
+
+// Estados de progresso
+const matriculado = ref(false)
+const progresso = ref(0)
 const certificadoGerado = ref(false)
+const moduloAtivo = ref(0)
+
+// Composables
+const route = useRoute()
+const router = useRouter()
+const { isAuthenticated, currentUser } = useAuth()
+
+// Módulos do curso (estrutura fixa para demonstração)
+const modulos = ref([
+  {
+    titulo: 'Módulo 1: Introdução',
+    descricao: 'Conceitos fundamentais e overview do curso',
+    status: 'concluido'
+  },
+  {
+    titulo: 'Módulo 2: Desenvolvimento',
+    descricao: 'Práticas e implementação',
+    status: progresso.value >= 66 ? 'concluido' : progresso.value >= 33 ? 'ativo' : 'bloqueado'
+  },
+  {
+    titulo: 'Módulo 3: Finalização',
+    descricao: 'Projeto final e avaliação',
+    status: progresso.value === 100 ? 'concluido' : progresso.value >= 66 ? 'ativo' : 'bloqueado'
+  }
+])
 
 // Computed properties
-const getTextoAcao = computed(() => {
-  if (progresso.value === 0) return 'Iniciar Módulo 1'
-  if (progresso.value < 33) return 'Concluir Módulo 1'
-  if (progresso.value < 66) return 'Concluir Módulo 2'
-  if (progresso.value < 100) return 'Concluir Módulo 3'
-  return 'Curso Concluído'
+const getProximaAcaoLabel = computed(() => {
+  if (atualizandoProgresso.value) return 'Atualizando...'
+  if (progresso.value === 0) return 'Começar Módulo 1'
+  if (progresso.value === 33) return 'Continuar para Módulo 2'
+  if (progresso.value === 66) return 'Continuar para Módulo 3'
+  return 'Finalizar Curso'
 })
 
-const getModulosConcluidos = () => {
-  if (progresso.value === 100) return 3
-  if (progresso.value >= 66) return 2
-  if (progresso.value >= 33) return 1
-  return 0
+// Métodos
+const getBadgeClass = (status: string): string => {
+  switch (status) {
+    case 'concluido': return 'bg-success'
+    case 'ativo': return 'bg-primary'
+    case 'bloqueado': return 'bg-secondary'
+    default: return 'bg-secondary'
+  }
 }
 
-// Dados dos cursos (mesmos da IndexView)
-const getCursosData = () => [
-  {
-    id: 1,
-    nome: 'Desenvolvimento Web com HTML5 e CSS3',
-    descricao: 'Saiba mais sobre os conceitos fundamentais de HTML5 e CSS3 com este curso básico!',
-    area: 'tecnologia',
-    duracao: 40,
-    instrutor: 'Prof. Ana Silva'
-  },
-  {
-    id: 2,
-    nome: 'JavaScript Avançado e ES6+',
-    descricao: 'Aprenda JavaScript moderno, incluindo recursos avançados do ES6 e além!',
-    area: 'tecnologia',
-    duracao: 60,
-    instrutor: 'Prof. Carlos Mendes'
-  },
-  {
-    id: 3,
-    nome: 'Desenvolvimento Full Stack com Vue.js e Node.js',
-    descricao: 'Domine o desenvolvimento full stack com Vue.js no frontend e Node.js no backend!',
-    area: 'tecnologia',
-    duracao: 120,
-    instrutor: 'Prof. Marina Costa'
-  },
-  {
-    id: 4,
-    nome: 'Banco de Dados SQL e NoSQL',
-    descricao: 'Aprenda a projetar e gerenciar bancos de dados relacionais e não-relacionais!',
-    area: 'tecnologia',
-    duracao: 80,
-    instrutor: 'Prof. Roberto Lima'
-  },
-  {
-    id: 5,
-    nome: 'Inteligência Artificial e Machine Learning',
-    descricao: 'Aprenda conceitos fundamentais de IA e Machine Learning para análise de dados!',
-    area: 'tecnologia',
-    duracao: 160,
-    instrutor: 'Prof. Fernanda Alves'
-  },
-  {
-    id: 6,
-    nome: 'DevOps e Integração Contínua',
-    descricao: 'Domine práticas de DevOps e técnicas de integração e entrega contínuas!',
-    area: 'tecnologia',
-    duracao: 90,
-    instrutor: 'Prof. João Santos'
-  },
-  {
-    id: 7,
-    nome: 'Gestão Pública',
-    descricao: 'Aprenda os fundamentos da administração pública e gestão de recursos públicos!',
-    area: 'administrativa',
-    duracao: 80,
-    instrutor: 'Prof. Paula Rodrigues'
-  },
-  {
-    id: 8,
-    nome: 'Administração Financeira',
-    descricao: 'Domine técnicas de administração financeira e orçamentária no setor público!',
-    area: 'administrativa',
-    duracao: 70,
-    instrutor: 'Prof. André Martins'
-  },
-  {
-    id: 9,
-    nome: 'Recursos Humanos',
-    descricao: 'Aprenda sobre gestão de pessoas, recrutamento e desenvolvimento profissional!',
-    area: 'administrativa',
-    duracao: 60,
-    instrutor: 'Prof. Luciana Ferreira'
-  },
-  {
-    id: 10,
-    nome: 'Direito Constitucional',
-    descricao: 'Estude os princípios fundamentais da Constituição Federal e sua aplicação!',
-    area: 'juridica',
-    duracao: 100,
-    instrutor: 'Prof. Ricardo Oliveira'
-  },
-  {
-    id: 11,
-    nome: 'Direito Administrativo',
-    descricao: 'Compreenda a organização e funcionamento da Administração Pública!',
-    area: 'juridica',
-    duracao: 120,
-    instrutor: 'Prof. Beatriz Souza'
-  },
-  {
-    id: 12,
-    nome: 'Direito Civil',
-    descricao: 'Estude as relações jurídicas entre pessoas físicas e jurídicas no âmbito privado!',
-    area: 'juridica',
-    duracao: 90,
-    instrutor: 'Prof. Gabriel Nascimento'
+const getStatusLabel = (status: string): string => {
+  switch (status) {
+    case 'concluido': return 'Concluído'
+    case 'ativo': return 'Em Andamento'
+    case 'bloqueado': return 'Bloqueado'
+    default: return 'Pendente'
   }
-]
+}
 
-// Buscar dados do curso real
+// Buscar dados do curso
 const buscarCurso = async () => {
   try {
     loading.value = true
     const cursoId = parseInt(route.params.id as string)
     
-    // Simular carregamento
-    await new Promise(resolve => setTimeout(resolve, 500))
+    const cursoDTO = await apiService.getCurso(cursoId)
     
-    // Buscar curso real pelos dados
-    const cursosData = getCursosData()
-    const cursoEncontrado = cursosData.find(c => c.id === cursoId)
-    
-    if (!cursoEncontrado) {
+    if (!cursoDTO) {
       throw new Error('Curso não encontrado')
     }
     
     curso.value = {
-      id: cursoEncontrado.id,
-      titulo: cursoEncontrado.nome,
-      descricao: cursoEncontrado.descricao,
-      instrutor: cursoEncontrado.instrutor,
-      duracao: cursoEncontrado.duracao,
-      preco: 0 // Todos os cursos são gratuitos
+      id: cursoDTO.ID,
+      titulo: cursoDTO.Titulo,
+      descricao: cursoDTO.Descricao || 'Descrição não disponível',
+      instrutor: cursoDTO.Instrutor || 'Instrutor não informado',
+      duracao: cursoDTO.Duracao
     }
     
     await verificarMatricula()
     
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Erro ao carregar curso'
+  } catch (err: any) {
+    console.error('Erro ao carregar curso:', err)
+    error.value = err.message || 'Erro ao carregar curso'
   } finally {
     loading.value = false
   }
 }
 
-// Verificar matrícula existente
+// Verificar se usuário está matriculado
 const verificarMatricula = async () => {
-  if (!currentUser.value?.id) return
+  if (!currentUser.value?.id || !curso.value?.id) return
   
-  const matriculaKey = `matricula_${curso.value?.id}_${currentUser.value.id}`
-  const matriculaData = localStorage.getItem(matriculaKey)
-  
-  if (matriculaData) {
-    const dados = JSON.parse(matriculaData)
-    matriculado.value = true
-    progresso.value = dados.progresso || 0
-    certificadoGerado.value = dados.certificadoGerado || false
+  try {
+    const matriculas = await apiService.getMatriculas()
+    const matriculaEncontrada = matriculas.find(m => 
+      m.Aluno_ID === currentUser.value!.id && m.Curso_ID === curso.value!.id
+    )
+    
+    if (matriculaEncontrada) {
+      matricula.value = matriculaEncontrada
+      matriculado.value = true
+      
+      // Simular progresso baseado no status
+      if (matriculaEncontrada.Status === 1) { // Concluída
+        progresso.value = 100
+        certificadoGerado.value = true
+      } else {
+        progresso.value = 33 // Progresso padrão para matrícula ativa
+      }
+      
+      atualizarModulos()
+    }
+  } catch (err) {
+    console.error('Erro ao verificar matrícula:', err)
   }
 }
 
-// Iniciar curso (matrícula simulada)
+// Atualizar status dos módulos
+const atualizarModulos = () => {
+  modulos.value[0].status = 'concluido'
+  modulos.value[1].status = progresso.value >= 66 ? 'concluido' : progresso.value >= 33 ? 'ativo' : 'bloqueado'
+  modulos.value[2].status = progresso.value === 100 ? 'concluido' : progresso.value >= 66 ? 'ativo' : 'bloqueado'
+  
+  // Definir módulo ativo
+  if (progresso.value < 33) moduloAtivo.value = 0
+  else if (progresso.value < 66) moduloAtivo.value = 1
+  else moduloAtivo.value = 2
+}
+
+// Iniciar curso (criar matrícula)
 const iniciarCurso = async () => {
   try {
     iniciando.value = true
@@ -441,28 +334,23 @@ const iniciarCurso = async () => {
       return
     }
 
-    // Simular matrícula (sem API)
-    await new Promise(resolve => setTimeout(resolve, 800)) // Simular carregamento
+    if (!curso.value?.id) return
 
-    // Salvar matrícula local
-    const dadosMatricula = {
-      cursoId: curso.value?.id || 0,
-      alunoId: currentUser.value?.id || 0,
-      progresso: 0,
-      dataInicio: new Date().toISOString(),
-      certificadoGerado: false
+    const novaMatricula = await apiService.createMatricula({
+      Curso_ID: curso.value.id,
+      Aluno_ID: currentUser.value.id
+    })
+    
+    if (novaMatricula) {
+      matricula.value = novaMatricula
+      matriculado.value = true
+      progresso.value = 0
+      atualizarModulos()
     }
     
-    localStorage.setItem(
-      `matricula_${curso.value?.id}_${currentUser.value?.id}`, 
-      JSON.stringify(dadosMatricula)
-    )
-    
-    matriculado.value = true
-    progresso.value = 0
-    
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Erro ao iniciar curso'
+  } catch (err: any) {
+    console.error('Erro ao iniciar curso:', err)
+    error.value = 'Erro ao se matricular no curso. Tente novamente.'
   } finally {
     iniciando.value = false
   }
@@ -473,61 +361,58 @@ const avancarProgresso = async () => {
   try {
     atualizandoProgresso.value = true
     
-    // Simular progresso
-    await new Promise(resolve => setTimeout(resolve, 800))
+    // Simular progresso em etapas
+    let novoProgresso = 0
+    if (progresso.value === 0) novoProgresso = 33
+    else if (progresso.value === 33) novoProgresso = 66
+    else if (progresso.value === 66) novoProgresso = 100
     
-    if (progresso.value < 100) {
-      const novoProgresso = Math.min(progresso.value + 33, 100)
-      progresso.value = novoProgresso
-      
-      // Salvar progresso
-      const matriculaKey = `matricula_${curso.value?.id}_${currentUser.value?.id}`
-      const dadosMatricula = JSON.parse(localStorage.getItem(matriculaKey) || '{}')
-      dadosMatricula.progresso = novoProgresso
-      localStorage.setItem(matriculaKey, JSON.stringify(dadosMatricula))
-    }
+    progresso.value = novoProgresso
+    atualizarModulos()
+    
+         // Se completou 100%, atualizar status da matrícula
+     // if (novoProgresso === 100 && matricula.value) {
+     //   await apiService.updateMatricula(matricula.value.ID, { Status: StatusMatricula.Concluida })
+     // }
     
   } catch (err) {
+    console.error('Erro ao atualizar progresso:', err)
     error.value = 'Erro ao atualizar progresso'
   } finally {
     atualizandoProgresso.value = false
   }
 }
 
-// Finalizar curso e gerar certificado (simulado)
+// Finalizar curso e gerar certificado
 const finalizarCurso = async () => {
   try {
     finalizando.value = true
     
-    if (!currentUser.value?.id) return
+    if (!currentUser.value?.id || !curso.value?.id) return
 
-    // Simular geração de certificado (sem API)
-    await new Promise(resolve => setTimeout(resolve, 1200)) // Simular carregamento
-
-    // Atualizar estado local
-    const matriculaKey = `matricula_${curso.value?.id}_${currentUser.value?.id}`
-    const dadosMatricula = JSON.parse(localStorage.getItem(matriculaKey) || '{}')
-    dadosMatricula.certificadoGerado = true
-    dadosMatricula.dataConclusao = new Date().toISOString()
-    localStorage.setItem(matriculaKey, JSON.stringify(dadosMatricula))
+    // Criar certificado
+    await apiService.createCertificado({
+      Curso_ID: curso.value.id,
+      Aluno_ID: currentUser.value.id
+    })
     
     certificadoGerado.value = true
     
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Erro ao finalizar curso'
+  } catch (err: any) {
+    console.error('Erro ao gerar certificado:', err)
+    error.value = 'Erro ao gerar certificado. Tente novamente.'
   } finally {
     finalizando.value = false
   }
 }
 
-// Baixar certificado (placeholder)
-const baixarCertificado = () => {
-  // Por enquanto, redirecionar para certificados
-  router.push('/certificados')
-}
-
 // Inicializar
 onMounted(() => {
+  if (!isAuthenticated.value) {
+    router.push('/login')
+    return
+  }
+  
   buscarCurso()
 })
 </script>
@@ -554,7 +439,7 @@ onMounted(() => {
 
 .progresso-geral .progress {
   border-radius: 10px;
-  background-color: #f8f9fa;
+  background-color: #e9ecef;
 }
 
 .ambiente-principal {
@@ -577,8 +462,8 @@ onMounted(() => {
 }
 
 .modulo-card.modulo-ativo .card {
-  border-left: 4px solid #4f46e5 !important;
-  background: rgba(79, 70, 229, 0.02);
+  border-left: 4px solid #2c3cdc !important;
+  background: rgba(44, 60, 220, 0.02);
 }
 
 .modulo-status {
@@ -596,56 +481,9 @@ onMounted(() => {
   margin-top: 24px;
 }
 
-.certificado-sucesso {
-  animation: slideInUp 0.5s ease-out;
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-  .estudo-container {
-    padding: 15px;
-  }
-  
-  .curso-header {
-    padding: 20px;
-  }
-  
-  .modulos-container {
-    padding: 24px 20px;
-  }
-  
-  .curso-meta {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .curso-meta span {
-    margin-right: 0 !important;
-  }
-}
-
-/* Estados hover */
-.modulo-card:hover .card {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
-}
-
-.btn:hover {
-  transform: translateY(-1px);
-}
-
-/* Progress bar customizada */
-.progress-bar {
-  transition: width 0.6s ease;
+.info-item {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
 }
 </style> 

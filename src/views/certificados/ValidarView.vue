@@ -193,6 +193,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import apiService from '@/services/apiService'
 
 interface Portador {
   nome: string
@@ -222,7 +223,7 @@ export default defineComponent({
     }
   },
   methods: {
-    validarCertificado() {
+    async validarCertificado() {
       if (!this.codigoCertificado) {
         this.mensagemErro = 'Por favor, digite o código do certificado.'
         return
@@ -232,30 +233,36 @@ export default defineComponent({
       this.mensagemErro = ''
       this.certificadoValidado = null
       
-      // Simulando chamada à API
-      setTimeout(() => {
-        this.isLoading = false
+      try {
+        // Usando a API real para validar certificado
+        const certificado = await apiService.validarCertificado(this.codigoCertificado)
         
-        // Simulação: certificado válido apenas se começar com CERT-
-        if (this.codigoCertificado.startsWith('CERT-')) {
+        if (certificado) {
           this.certificadoValidado = {
-            codigo: this.codigoCertificado,
-            nome: 'Desenvolvimento Full Stack com Vue.js e Node.js',
-            area: 'Desenvolvimento Web',
-            duracao: 120,
-            nivel: 'Avançado',
-            dataEmissao: '15/06/2023',
+            codigo: certificado.Codigo_Validacao,
+            nome: certificado.CursoTitulo,
+            area: 'Desenvolvimento Web', // Campo não disponível na API ainda
+            duracao: 40, // Valor padrão - deve vir do curso
+            nivel: 'Intermediário', // Campo não disponível na API ainda
+            dataEmissao: new Date(certificado.Data_Emissao).toLocaleDateString('pt-BR'),
             validade: 'Indeterminada',
             portador: {
-              nome: 'Ana Silva Oliveira',
-              documento: '123.456.789-00',
-              email: 'ana.silva@email.com',
+              nome: certificado.AlunoNome,
+              documento: 'Não informado', // Campo não disponível na API ainda
+              email: 'Não informado', // Campo não disponível na API ainda
             },
           }
-        } else {
-          this.mensagemErro = 'Certificado não encontrado. Verifique o código e tente novamente.'
         }
-      }, 1500)
+      } catch (error: any) {
+        console.error('Erro ao validar certificado:', error)
+        if (error.response?.status === 404) {
+          this.mensagemErro = 'Certificado não encontrado. Verifique o código e tente novamente.'
+        } else {
+          this.mensagemErro = 'Erro ao validar certificado. Tente novamente.'
+        }
+      } finally {
+        this.isLoading = false
+      }
     },
     getBadgeColor(nivel: string): string {
       switch (nivel) {

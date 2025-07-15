@@ -1,292 +1,243 @@
-import { ref, computed, onMounted } from 'vue'
-import type { User, AuthState, AuthResponse, RegisterForm, LoginForm, ValidationError, Permission } from '@/types/auth'
-import { ROLE_PERMISSIONS } from '@/types/auth'
-import { validateLoginForm, validateRegisterForm, verifyPassword, generateToken, verifyToken } from '@/utils/autenticacao'
-import { 
-  saveAuthState, 
-  loadAuthState, 
-  clearAuthState, 
-  findUserByEmail, 
-  findUserById, 
-  createUser, 
-  updateUser, 
-  getUserPassword, 
-  initializeSystem,
-  loadUsers,
-  getSystemStats,
-  changeUserPassword
-} from '@/utils/armazenamento'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import apiService, { type AlunoDTO, type AlunoLoginDTO, type AlunoCreateDTO } from '@/services/apiService'
+
+// Interface para resposta de autenticação
+interface AuthResponse {
+  success: boolean
+  user?: AlunoDTO
+  message?: string
+  errors?: string[]
+}
+
+// Interface para dados do usuário atual
+interface CurrentUser {
+  id: number
+  nome: string
+  email: string
+  dataCadastro: string
+}
 
 // Estado global de autenticação
-const authState = ref<AuthState>({
+const authState = ref<{
+  user: CurrentUser | null
+  isAuthenticated: boolean
+  loading: boolean
+}>({
   user: null,
   isAuthenticated: false,
-  token: null
+  loading: false
 })
 
 export function useAuth() {
-  // Verificações de permissões
-  const isAdmin = computed(() => authState.value.user?.role === 'admin' || authState.value.user?.role === 'super-admin')
-  const isSuperAdmin = computed(() => authState.value.user?.role === 'super-admin')
-  const isAuthenticated = computed(() => authState.value.isAuthenticated && authState.value.user !== null)
+  const router = useRouter()
+
+  // Lista de emails de administradores
+  const adminEmails = [
+    'admin@habeis.com',
+    'administrador@habeis.com',
+    'bruno@habeis.com',
+    'admin@admin.com',
+    'super@admin.com'
+  ]
+
+  // Computed properties
+  const isAuthenticated = computed(() => authState.value.isAuthenticated)
   const currentUser = computed(() => authState.value.user)
+  const isLoading = computed(() => authState.value.loading)
   
-  // Verificar permissões específicas
-  const hasPermission = (permission: Permission): boolean => {
-    if (!authState.value.user) return false
-    return ROLE_PERMISSIONS[authState.value.user.role][permission] || false
-  }
-  
-  // Inicializar sistema
+  // Verificar se é admin
+  const isAdmin = computed(() => {
+    if (!isAuthenticated.value || !currentUser.value?.email) {
+      return false
+    }
+    return adminEmails.includes(currentUser.value.email.toLowerCase())
+  })
+
+  // Converter AlunoDTO para CurrentUser
+  const mapAlunoToUser = (aluno: AlunoDTO): CurrentUser => ({
+    id: aluno.ID,
+    nome: aluno.Nome,
+    email: aluno.Email,
+    dataCadastro: aluno.Data_Cadastro
+  })
+
+  // Inicializar autenticação - verificar se há dados salvos
   const initialize = async (): Promise<void> => {
+    authState.value.loading = true
+    
     try {
-      // Inicializar sistema com admin padrão se necessário
-      await initializeSystem()
+      const userEmail = localStorage.getItem('current_user_email')
+      const userName = localStorage.getItem('current_user_name')
+      const userId = localStorage.getItem('current_user_id')
       
-      // Carregar estado de autenticação salvo
-      const savedState = loadAuthState()
-      if (savedState && savedState.token) {
-        // Verificar se o token ainda é válido
-        const tokenData = verifyToken(savedState.token)
-        if (tokenData.valid) {
-          const user = findUserById(tokenData.userId)
-          if (user && user.isActive) {
-            authState.value = {
-              user,
-              isAuthenticated: true,
-              token: savedState.token
-            }
-          } else {
-            // Token válido mas usuário não existe ou inativo
-            clearAuthState()
-          }
-        } else {
-          // Token expirado
-          clearAuthState()
-        }
+      // Se não há dados salvos, não há usuário logado
+      if (!userEmail || !userName || userEmail === 'undefined' || userName === 'undefined') {
+        authState.value.loading = false
+        return
       }
+
+      // Restaurar usuário com dados salvos
+      authState.value.user = {
+        id: parseInt(userId || '0'),
+        nome: userName,
+        email: userEmail,
+        dataCadastro: localStorage.getItem('current_user_date') || new Date().toISOString()
+      }
+      authState.value.isAuthenticated = true
+      
     } catch (error) {
-      console.error('Erro ao inicializar sistema de autenticação:', error)
+      console.error('Erro na inicialização:', error)
+      // Em caso de erro, limpar dados
+      localStorage.removeItem('current_user_email')
+      localStorage.removeItem('current_user_name')
+      localStorage.removeItem('current_user_id')
+      localStorage.removeItem('current_user_date')
+    } finally {
+      authState.value.loading = false
     }
   }
-  
+
   // Login
   const login = async (email: string, password: string): Promise<AuthResponse> => {
+    authState.value.loading = true
+
     try {
-      // Validar formulário
-      const validationErrors = validateLoginForm({ email, password })
-      if (validationErrors.length > 0) {
-        return { success: false, errors: validationErrors }
+      const credentials: AlunoLoginDTO = {
+        Email: email,
+        Senha: password
       }
+
+      const user = await apiService.login(credentials)
       
-      // Buscar usuário
-      const user = findUserByEmail(email)
-      if (!user) {
-        return { success: false, message: 'Email ou senha inválidos' }
-      }
-      
-      // Verificar se usuário está ativo
-      if (!user.isActive) {
-        return { success: false, message: 'Conta desativada. Entre em contato com o administrador' }
-      }
-      
-      // Verificar senha
-      const userPassword = getUserPassword(user.id)
-      if (!userPassword) {
-        return { success: false, message: 'Erro interno. Tente novamente' }
-      }
-      
-      const isPasswordValid = await verifyPassword(password, userPassword)
-      if (!isPasswordValid) {
-        return { success: false, message: 'Email ou senha inválidos' }
-      }
-      
-      // Atualizar último login
-      const updatedUser = updateUser(user.id, { lastLogin: new Date() })
-      if (!updatedUser) {
-        return { success: false, message: 'Erro ao fazer login' }
-      }
-      
-      // Gerar token
-      const token = generateToken(user.id)
+      // Salvar dados no localStorage
+      localStorage.setItem('current_user_email', user.Email)
+      localStorage.setItem('current_user_name', user.Nome)
+      localStorage.setItem('current_user_id', user.ID.toString())
+      localStorage.setItem('current_user_date', user.Data_Cadastro)
       
       // Atualizar estado
-      authState.value = {
-        user: updatedUser,
-        isAuthenticated: true,
-        token
+      authState.value.user = mapAlunoToUser(user)
+      authState.value.isAuthenticated = true
+
+      return { 
+        success: true, 
+        user 
       }
-      
-      // Salvar estado
-      saveAuthState(authState.value)
-      
-      return { success: true, user: updatedUser, token }
-      
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('Erro no login:', error)
-      return { success: false, message: 'Erro interno. Tente novamente' }
+      
+      let message = 'Erro ao fazer login'
+      if (error.response?.status === 401) {
+        message = 'Email ou senha incorretos'
+      } else if (error.response?.status === 404) {
+        message = 'Usuário não encontrado'
+      } else if (error.response?.data?.message) {
+        message = error.response.data.message
+      }
+
+      return { 
+        success: false, 
+        message 
+      }
+    } finally {
+      authState.value.loading = false
     }
   }
-  
-  // Cadastro
-  const register = async (formData: RegisterForm): Promise<AuthResponse> => {
+
+  // Registro
+  const register = async (nome: string, email: string, password: string): Promise<AuthResponse> => {
+    authState.value.loading = true
+
     try {
-      // Validar formulário
-      const validationErrors = validateRegisterForm(formData)
-      if (validationErrors.length > 0) {
-        return { success: false, errors: validationErrors }
+      const userData: AlunoCreateDTO = {
+        Nome: nome,
+        Email: email,
+        Senha: password
       }
+
+      const user = await apiService.register(userData)
       
-      // Verificar se email já existe
-      const existingUser = findUserByEmail(formData.email)
-      if (existingUser) {
-        return { success: false, message: 'Já existe uma conta com este email' }
-      }
-      
-      // Criar usuário
-      const newUser = await createUser({
-        nome: formData.nome,
-        email: formData.email,
-        telefone: formData.telefone,
-        password: formData.password,
-        role: 'user'
-      })
-      
-      // Gerar token
-      const token = generateToken(newUser.id)
+      // Salvar dados no localStorage
+      localStorage.setItem('current_user_email', user.Email)
+      localStorage.setItem('current_user_name', user.Nome)
+      localStorage.setItem('current_user_id', user.ID.toString())
+      localStorage.setItem('current_user_date', user.Data_Cadastro)
       
       // Atualizar estado
-      authState.value = {
-        user: newUser,
-        isAuthenticated: true,
-        token
+      authState.value.user = mapAlunoToUser(user)
+      authState.value.isAuthenticated = true
+
+      return { 
+        success: true, 
+        user 
       }
+
+    } catch (error: any) {
+      console.error('Erro no registro:', error)
       
-      // Salvar estado
-      saveAuthState(authState.value)
-      
-      return { success: true, user: newUser, token }
-      
-    } catch (error) {
-      console.error('Erro no cadastro:', error)
-      return { success: false, message: 'Erro ao criar conta. Tente novamente' }
+      let message = 'Erro ao criar conta'
+      if (error.response?.status === 400) {
+        message = 'Dados inválidos'
+      } else if (error.response?.status === 409) {
+        message = 'Este email já está em uso'
+      } else if (error.response?.data?.message) {
+        message = error.response.data.message
+      }
+
+      return { 
+        success: false, 
+        message 
+      }
+    } finally {
+      authState.value.loading = false
     }
   }
-  
+
   // Logout
   const logout = (): void => {
-    authState.value = {
-      user: null,
-      isAuthenticated: false,
-      token: null
-    }
-    clearAuthState()
-  }
-  
-  // Funções administrativas
-  const getAllUsers = (): User[] => {
-    if (!hasPermission('canManageUsers')) {
-      throw new Error('Sem permissão para listar usuários')
-    }
-    return loadUsers()
-  }
-  
-  const promoteUser = (userId: string, newRole: 'user' | 'admin'): User | null => {
-    if (!hasPermission('canManageUsers')) {
-      throw new Error('Sem permissão para promover usuários')
-    }
+    authState.value.user = null
+    authState.value.isAuthenticated = false
     
-    // Super admin pode promover qualquer um
-    // Admin só pode promover para user
-    if (authState.value.user?.role === 'admin' && newRole === 'admin') {
-      throw new Error('Apenas super admins podem promover outros administradores')
-    }
+    // Limpar dados armazenados
+    localStorage.removeItem('current_user_email')
+    localStorage.removeItem('current_user_name')
+    localStorage.removeItem('current_user_id')
+    localStorage.removeItem('current_user_date')
     
-    return updateUser(userId, { role: newRole })
-  }
-  
-  const deactivateUser = (userId: string): User | null => {
-    if (!hasPermission('canManageUsers')) {
-      throw new Error('Sem permissão para desativar usuários')
-    }
-    
-    // Não pode desativar a si mesmo
-    if (userId === authState.value.user?.id) {
-      throw new Error('Não é possível desativar sua própria conta')
-    }
-    
-    return updateUser(userId, { isActive: false })
-  }
-  
-  const activateUser = (userId: string): User | null => {
-    if (!hasPermission('canManageUsers')) {
-      throw new Error('Sem permissão para ativar usuários')
-    }
-    
-    return updateUser(userId, { isActive: true })
-  }
-  
-    const updateUserProfile = (userData: Partial<User>): User | null => {
-    if (!authState.value.user) {
-      throw new Error('Usuário não autenticado')
-    }
-    
-    const updatedUser = updateUser(authState.value.user.id, userData)
-    if (updatedUser) {
-      authState.value.user = updatedUser
-      saveAuthState(authState.value)
-    }
-    
-    return updatedUser
+    // Redirecionar para home
+    router.push('/')
   }
 
-  // Alterar senha do usuário
-  const alterarSenhaUsuario = async (senhaAtual: string, novaSenha: string): Promise<{ success: boolean; message: string }> => {
-    if (!authState.value.user) {
-      return { success: false, message: 'Usuário não autenticado' }
-    }
-
-    return await changeUserPassword(authState.value.user.id, senhaAtual, novaSenha)
+  // Verificar se usuário tem permissão
+  const hasPermission = (permission: string): boolean => {
+    return authState.value.isAuthenticated
   }
 
-  const getStats = () => {
-    if (!hasPermission('canAccessAdmin')) {
-      throw new Error('Sem permissão para visualizar estatísticas')
+  // Função para atualizar perfil do usuário
+  const updateUserProfile = (userData: Partial<CurrentUser>): void => {
+    if (authState.value.user) {
+      authState.value.user = {
+        ...authState.value.user,
+        ...userData
+      }
     }
-
-    return getSystemStats()
   }
-
-  // Inicializar ao montar
-  onMounted(async () => {
-    await initialize()
-  })
 
   return {
     // Estado
-    isAdmin,
-    isSuperAdmin,
     isAuthenticated,
     currentUser,
+    isLoading,
+    isAdmin,
     
-    // Métodos de autenticação
+    // Métodos
+    initialize,
     login,
     register,
     logout,
-    initialize,
-    
-    // Verificações
     hasPermission,
-    
-    // Métodos de perfil
-    updateUserProfile,
-    alterarSenhaUsuario,
-    
-    // Métodos administrativos
-    getAllUsers,
-    promoteUser,
-    deactivateUser,
-    activateUser,
-    getStats
+    updateUserProfile
   }
 } 

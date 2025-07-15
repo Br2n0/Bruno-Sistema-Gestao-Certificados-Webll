@@ -1,21 +1,16 @@
 <template>
-  <!-- Layout para rotas de autenticação -->
-  <div v-if="isAuthRoute">
-    <router-view></router-view>
-  </div>
-  
-  <!-- Layout padrão SEM SIDEBAR - apenas header horizontal -->
-  <div v-else>
+  <!-- Layout padrão COM HEADER para todas as rotas -->
+  <div>
     <HeadBar />
 
     <div class="main-container">
       <div class="main-content">
-        <BreadCrumb />
+        <BreadCrumb v-if="!isAuthRoute" />
         <router-view></router-view>
       </div>
     </div>
 
-    <FooterBar />
+    <FooterBar v-if="!isAuthRoute" />
   </div>
 </template>
 
@@ -31,7 +26,7 @@ import { useAuth } from './composables/useAuth'
 const { initialize } = useAuth()
 const route = useRoute()
 
-// Verificar se é uma rota de autenticação
+// Verificar se é uma rota de autenticação (apenas para esconder breadcrumb e footer)
 const isAuthRoute = computed(() => {
   return route.path.startsWith('/login') || route.path.startsWith('/registro')
 })
@@ -52,7 +47,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: system-ui, -apple-system, sans-serif;
-  background-color: #f8f9fa;
+  background-color: #fcfcfc;
 }
 
 /* === LAYOUT PRINCIPAL SEM SIDEBAR === */
