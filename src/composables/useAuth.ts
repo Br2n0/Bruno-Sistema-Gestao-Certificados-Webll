@@ -225,19 +225,33 @@ export function useAuth() {
     return updateUser(userId, { isActive: true })
   }
   
+    const updateUserProfile = (userData: Partial<User>): User | null => {
+    if (!authState.value.user) {
+      throw new Error('Usuário não autenticado')
+    }
+    
+    const updatedUser = updateUser(authState.value.user.id, userData)
+    if (updatedUser) {
+      authState.value.user = updatedUser
+      saveAuthState(authState.value)
+    }
+    
+    return updatedUser
+  }
+
   const getStats = () => {
     if (!hasPermission('canAccessAdmin')) {
       throw new Error('Sem permissão para visualizar estatísticas')
     }
-    
+
     return getSystemStats()
   }
-  
+
   // Inicializar ao montar
   onMounted(async () => {
     await initialize()
   })
-  
+
   return {
     // Estado
     isAdmin,
@@ -253,6 +267,9 @@ export function useAuth() {
     
     // Verificações
     hasPermission,
+    
+    // Métodos de perfil
+    updateUserProfile,
     
     // Métodos administrativos
     getAllUsers,

@@ -191,10 +191,39 @@ export const initializeSystem = async (): Promise<void> => {
         password: 'admin123', // Senha padrão - deve ser alterada
         role: DEFAULT_ADMIN.role
       })
+
+      // Criar usuário de teste comum
+      await createUser({
+        nome: 'João Silva',
+        email: 'usuario@teste.com',
+        telefone: '(11) 99999-9999',
+        password: '123456',
+        role: 'user'
+      })
+
+      // Criar usuário administrador de teste
+      await createUser({
+        nome: 'Maria Santos',
+        email: 'admin@teste.com',
+        telefone: '(11) 88888-8888',
+        password: '123456',
+        role: 'admin'
+      })
       
       localStorage.setItem(STORAGE_KEYS.INITIALIZED, 'true')
-      console.log('Sistema inicializado com admin master padrão')
-      console.log('Email: admin@habeis.com | Senha: admin123')
+      console.log('📚 Sistema Hábeis Educacional Inicializado!')
+      console.log('🔐 Contas de teste criadas:')
+      console.log('👨‍💼 Admin Master: admin@habeis.com | Senha: admin123')
+      console.log('👤 Usuário Comum: usuario@teste.com | Senha: 123456')
+      console.log('👩‍💼 Admin: admin@teste.com | Senha: 123456')
+      console.log('')
+      console.log('💡 Para resetar o sistema em desenvolvimento, execute:')
+      console.log('resetSystem()')
+      
+      // Expor função de reset globalmente para desenvolvimento
+      if (typeof window !== 'undefined') {
+        (window as any).resetSystem = resetSystem
+      }
     } catch (error) {
       console.error('Erro ao inicializar sistema:', error)
     }
@@ -204,6 +233,15 @@ export const initializeSystem = async (): Promise<void> => {
 // Verificar se é primeiro acesso
 export const isFirstAccess = (): boolean => {
   return !localStorage.getItem(STORAGE_KEYS.INITIALIZED)
+}
+
+// Resetar sistema (útil para desenvolvimento)
+export const resetSystem = (): void => {
+  localStorage.removeItem(STORAGE_KEYS.AUTH_STATE)
+  localStorage.removeItem(STORAGE_KEYS.USERS)
+  localStorage.removeItem(STORAGE_KEYS.INITIALIZED)
+  localStorage.removeItem('habeis_passwords')
+  console.log('🔄 Sistema resetado! Recarregue a página para recriar usuários de teste.')
 }
 
 // Obter estatísticas do sistema

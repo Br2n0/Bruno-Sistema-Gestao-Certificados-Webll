@@ -1,389 +1,729 @@
 <template>
-<header class="pc-header" :class="{ 'sidebar-collapsed': isCollapsed && !isMobile }">
-  <div class="header-wrapper"> 
-    <!-- [Mobile Media Block] start -->
-    <div class="me-auto pc-mob-drp">
-      <ul class="list-unstyled">
-        <!-- ======= Menu collapse Icon ===== -->
-        <li class="pc-h-item pc-sidebar-collapse">
-          <a href="#" class="pc-head-link ms-0" @click.prevent="toggleSidebar">
-            <i class="ti ti-menu-2"></i>
-          </a>
-        </li>
-        <li class="pc-h-item pc-sidebar-popup">
-          <a href="#" class="pc-head-link ms-0" @click.prevent="toggleSidebar">
-            <i class="ti ti-menu-2"></i>
-          </a>
-        </li>
-        <li class="dropdown pc-h-item d-inline-flex d-md-none">
-          <a
-            class="pc-head-link dropdown-toggle arrow-none m-0"
-            data-bs-toggle="dropdown"
-            href="#"
-            role="button"
-            aria-haspopup="false"
-            aria-expanded="false"
-          >
-            <i class="ti ti-search"></i>
-          </a>
-          <div class="dropdown-menu pc-h-dropdown drp-search">
-            <form class="px-3" @submit.prevent="realizarBusca">
-              <div class="form-group mb-0 d-flex align-items-center">
-                <i class="ti ti-search"></i>
-                <input 
-                  type="search" 
-                  class="form-control border-0 shadow-none" 
-                  placeholder="Buscar cursos..." 
-                  v-model="termoBusca"
-                >
-              </div>
-            </form>
+  <header class="modern-header">
+    <div class="header-container">
+      <!-- Logo + Nome da Empresa -->
+      <div class="brand-section">
+        <router-link to="/" class="brand-link">
+          <img 
+            src="../assets/imagens/logotipo.png" 
+            alt="Hábeis Educacional" 
+            class="brand-logo"
+          />
+          <div class="brand-text">
+            <span class="brand-name">Hábeis Educacional</span>
           </div>
-        </li>
-      </ul>
-    </div>
-    <!-- [Mobile Media Block end] -->
-    
-    <!-- [Desktop Search] -->
-    <div class="d-none d-md-flex align-items-center justify-content-center" style="width: 50%;">
-      <form class="header-search w-100" @submit.prevent="realizarBusca">
-        <div class="input-group">
-          <input 
-            type="search" 
-            class="form-control" 
-            placeholder="Buscar cursos, certificados ou áreas..." 
-            v-model="termoBusca"
+        </router-link>
+      </div>
+
+      <!-- Barra de Pesquisa Compacta -->
+      <div class="search-section">
+        <form @submit.prevent="realizarBusca" class="search-form">
+          <div class="search-input-group">
+            <i class="ti ti-search search-icon"></i>
+            <input 
+              type="search" 
+              class="search-input" 
+              placeholder="Pesquisar..."
+              v-model="termoBusca"
+            />
+          </div>
+        </form>
+      </div>
+
+      <!-- Menu Horizontal + Botões -->
+      <div class="nav-section">
+        <nav class="horizontal-nav">
+          <!-- Link Início -->
+          <router-link to="/" class="nav-item" @click="realizarBusca">
+            <i class="ti ti-home nav-icon"></i>
+            <span class="nav-text">Início</span>
+          </router-link>
+
+          <!-- Link Cursos -->
+          <router-link to="/cursos" class="nav-item">
+            <i class="ti ti-book nav-icon"></i>
+            <span class="nav-text">Cursos</span>
+          </router-link>
+
+          <!-- Certificados (só se logado) -->
+          <router-link 
+            v-if="isAuthenticated" 
+            to="/certificados" 
+            class="nav-item"
           >
-          <button class="btn btn-primary" type="submit">
-            <i class="ti ti-search"></i>
-          </button>
-        </div>
-      </form>
-    </div>
+            <i class="ti ti-certificate nav-icon"></i>
+            <span class="nav-text">Certificados</span>
+          </router-link>
+        </nav>
 
-    <!-- [Right Side Menu] -->
-    <div class="ms-auto">
-      <ul class="list-unstyled">
-        <!-- Quando usuário NÃO está logado - mostrar apenas Entrar -->
-        <template v-if="!isAuthenticated">
-          <li class="pc-h-item d-flex align-items-center">
-            <div class="auth-buttons-container">
-              <router-link 
-                to="/login" 
-                class="btn-entrar-azul"
-              >
-                <i class="ti ti-login me-2"></i>
-                Entrar
-              </router-link>
-            </div>
-          </li>
-        </template>
+        <!-- Botões de Autenticação -->
+        <div class="auth-section">
+          <!-- Usuário NÃO logado -->
+          <template v-if="!isAuthenticated">
+            <router-link to="/login" class="btn-entrar">
+              <i class="ti ti-login"></i>
+              <span>Entrar</span>
+            </router-link>
+          </template>
 
-        <!-- Quando usuário ESTÁ logado - mostrar Notificações/Minha Conta -->
-        <template v-else>
-          <!-- Notificações -->
-          <li class="dropdown pc-h-item">
-            <a
-              class="pc-head-link dropdown-toggle arrow-none me-0"
-              href="#"
-              role="button"
-              aria-haspopup="false"
-              aria-expanded="false"
-            >
+          <!-- Usuário logado -->
+          <template v-else>
+            <!-- Notificações -->
+            <button class="notification-btn" title="Notificações">
               <i class="ti ti-bell"></i>
-            </a>
-          </li>
-          
-          <!-- Perfil do Usuário -->
-          <li class="dropdown pc-h-item header-user-profile" ref="dropdownRef">
-            <a
-              class="pc-head-link dropdown-toggle arrow-none me-0"
-              href="#"
-              role="button"
-              aria-haspopup="false"
-              :aria-expanded="isDropdownOpen"
-              @click.prevent="toggleDropdown"
-            >
-              <div class="user-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
-                <span>{{ getUserInitials().charAt(0) }}</span>
-              </div>
-              <span>Minha Conta</span>
-            </a>
-            <div 
-              class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown" 
-              :class="{ 'show': isDropdownOpen }"
-            >
-              <div class="dropdown-header">
-                <div class="d-flex mb-1">
-                  <div class="flex-shrink-0">
-                    <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
-                      <span>{{ getUserInitials().charAt(0) }}</span>
-                    </div>
+            </button>
+
+            <!-- Menu do usuário -->
+            <div class="user-menu" ref="userMenuRef">
+              <button @click="toggleUserMenu" class="user-btn">
+                <div class="user-avatar">
+                  <img 
+                    v-if="currentUser?.fotoUrl" 
+                    :src="currentUser.fotoUrl" 
+                    alt="Foto de perfil"
+                    class="user-avatar-img"
+                  />
+                  <span v-else>{{ getUserInitials() }}</span>
+                </div>
+                <span class="user-name">{{ currentUser?.nome?.split(' ')[0] || 'Usuário' }}</span>
+                <i class="ti ti-chevron-down"></i>
+              </button>
+
+              <!-- Dropdown do usuário -->
+              <div v-if="isUserMenuOpen" class="user-dropdown">
+                <div class="user-info">
+                  <div class="user-avatar-large">
+                    <img 
+                      v-if="currentUser?.fotoUrl" 
+                      :src="currentUser.fotoUrl" 
+                      alt="Foto de perfil"
+                      class="user-avatar-large-img"
+                    />
+                    <span v-else>{{ getUserInitials() }}</span>
                   </div>
-                  <div class="flex-grow-1 ms-3">
-                    <h6 class="mb-1">{{ currentUser?.nome || 'Usuário' }}</h6>
-                    <span>{{ currentUser?.email || 'email@exemplo.com' }}</span>
+                  <div class="user-details">
+                    <strong>{{ currentUser?.nome || 'Usuário' }}</strong>
+                    <small>{{ currentUser?.email || 'email@exemplo.com' }}</small>
                   </div>
                 </div>
+                
+                <div class="dropdown-divider"></div>
+                
+                <router-link to="/configuracoes" class="dropdown-item" @click="closeUserMenu">
+                  <i class="ti ti-settings"></i>
+                  <span>Configurações</span>
+                </router-link>
+                
+                <div class="dropdown-divider"></div>
+                
+                <button @click="logout" class="dropdown-item logout-btn">
+                  <i class="ti ti-logout"></i>
+                  <span>Sair</span>
+                </button>
               </div>
-              <div class="dropdown-divider"></div>
-              <router-link to="/configuracoes" class="dropdown-item" @click="closeDropdown">
-                <i class="ti ti-settings"></i>
-                <span>Configurações</span>
-              </router-link>
-              <div class="dropdown-divider"></div>
-              <a href="#!" class="dropdown-item text-danger" @click="logout">
-                <i class="ti ti-power"></i>
-                <span>Sair da conta</span>
-              </a>
-              <div class="dropdown-divider"></div>
-              <small class="dropdown-item-text text-muted">
-                <i class="ti ti-info-circle me-1"></i>
-                Faça logout para ver os botões de login
-              </small>
             </div>
-          </li>
-        </template>
-      </ul>
+          </template>
+        </div>
+
+        <!-- Menu Mobile -->
+        <button class="mobile-menu-btn" @click="toggleMobileMenu">
+          <i class="ti ti-menu-2"></i>
+        </button>
+      </div>
     </div>
-  </div>
-</header>
+
+    <!-- Menu Mobile Expandido -->
+    <div v-if="isMobileMenuOpen" class="mobile-menu">
+      <router-link to="/" class="mobile-nav-item" @click="closeMobileMenu">
+        <i class="ti ti-home"></i>
+        <span>Início</span>
+      </router-link>
+      
+      <router-link to="/cursos" class="mobile-nav-item" @click="closeMobileMenu">
+        <i class="ti ti-book"></i>
+        <span>Cursos</span>
+      </router-link>
+      
+      <router-link 
+        v-if="isAuthenticated" 
+        to="/certificados" 
+        class="mobile-nav-item" 
+        @click="closeMobileMenu"
+      >
+        <i class="ti ti-certificate"></i>
+        <span>Certificados</span>
+      </router-link>
+      
+      <div class="mobile-divider"></div>
+      
+      <template v-if="!isAuthenticated">
+        <router-link to="/login" class="mobile-nav-item login-mobile" @click="closeMobileMenu">
+          <i class="ti ti-login"></i>
+          <span>Entrar</span>
+        </router-link>
+      </template>
+      
+      <template v-else>
+        <router-link to="/configuracoes" class="mobile-nav-item" @click="closeMobileMenu">
+          <i class="ti ti-settings"></i>
+          <span>Configurações</span>
+        </router-link>
+        
+        <button @click="logout" class="mobile-nav-item logout-mobile">
+          <i class="ti ti-logout"></i>
+          <span>Sair</span>
+        </button>
+      </template>
+    </div>
+  </header>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuth } from '@/composables/useAuth';
-import { useSidebar } from '@/composables/useSidebar';
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuth } from '@/composables/useAuth'
 
-const router = useRouter();
-const termoBusca = ref('');
+const router = useRouter()
+const termoBusca = ref('')
+const isUserMenuOpen = ref(false)
+const isMobileMenuOpen = ref(false)
+const userMenuRef = ref<HTMLElement | null>(null)
 
-// Usa o sistema de autenticação
-const { currentUser, logout: authLogout, isAuthenticated, isAdmin } = useAuth();
+// Sistema de autenticação
+const { currentUser, logout: authLogout, isAuthenticated } = useAuth()
 
-// Usa o sistema de sidebar
-const { toggleSidebar, isCollapsed, isMobile } = useSidebar();
-
-// Método para realizar a busca
+// Realizar busca
 const realizarBusca = () => {
   if (termoBusca.value.trim() !== '') {
     router.push({ 
       path: '/cursos',
       query: { q: termoBusca.value }
-    });
-    termoBusca.value = '';
+    })
+    termoBusca.value = ''
   }
-};
+}
 
-// Método para obter as iniciais do usuário para o avatar
+// Obter iniciais do usuário
 const getUserInitials = () => {
-  if (!currentUser.value?.nome) return 'U';
+  if (!currentUser.value?.nome) return 'U'
   return currentUser.value.nome
     .split(' ')
     .map(name => name.charAt(0))
     .join('')
     .substring(0, 2)
-    .toUpperCase();
-};
+    .toUpperCase()
+}
 
-// Método de logout
+// Controles de menu
+const toggleUserMenu = () => {
+  isUserMenuOpen.value = !isUserMenuOpen.value
+}
+
+const closeUserMenu = () => {
+  isUserMenuOpen.value = false
+}
+
+const toggleMobileMenu = () => {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value
+}
+
+const closeMobileMenu = () => {
+  isMobileMenuOpen.value = false
+}
+
+// Logout
 const logout = () => {
-  authLogout();
-  router.push('/');
-  closeDropdown();
-};
+  authLogout()
+  router.push('/')
+  closeUserMenu()
+  closeMobileMenu()
+}
 
-// Controle do dropdown
-const dropdownRef = ref<HTMLElement | null>(null);
-const isDropdownOpen = ref(false);
-
-const toggleDropdown = () => {
-  isDropdownOpen.value = !isDropdownOpen.value;
-};
-
-const closeDropdown = () => {
-  isDropdownOpen.value = false;
-};
-
-// Fechar dropdown ao clicar fora
+// Fechar menus ao clicar fora
 const handleClickOutside = (event: MouseEvent) => {
-  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
-    closeDropdown();
+  if (userMenuRef.value && !userMenuRef.value.contains(event.target as Node)) {
+    closeUserMenu()
   }
-};
+}
 
-// Adicionar/remover event listeners
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside);
-});
+  document.addEventListener('click', handleClickOutside)
+})
 
 onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside);
-});
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
 
 <style scoped>
-.header-search {
-  position: relative;
-}
-
-.header-search .form-control {
-  padding-left: 2.5rem;
-  border-radius: 50px;
-  background-color: #f8f9fa; 
-}
-
-.header-search .btn {
-  border-radius: 0 50px 50px 0;
-  position: absolute;
-  right: 0;
+/* === HEADER PRINCIPAL === */
+.modern-header {
+  position: fixed;
   top: 0;
-  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+  color: white;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(79, 70, 229, 0.3);
 }
 
-.user-avatar {
-  width: 30px;
-  height: 30px;
-  font-weight: bold;
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* === SEÇÃO DA MARCA === */
+.brand-section {
+  display: flex;
+  align-items: center;
+  min-width: 200px;
+}
+
+.brand-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: white;
+  gap: 12px;
+}
+
+.brand-logo {
+  height: 45px;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: white;
+}
+
+/* === SEÇÃO DE PESQUISA === */
+.search-section {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 30px;
+}
+
+.search-form {
+  width: 100%;
+}
+
+.search-input-group {
+  position: relative;
+  width: 100%;
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-size: 16px;
+  z-index: 2;
+}
+
+.search-input {
+  width: 100%;
+  height: 45px;
+  padding: 0 20px 0 45px;
+  border: none;
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #374151;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
+.search-input:focus {
+  background: white;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+/* === SEÇÃO DE NAVEGAÇÃO === */
+.nav-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.horizontal-nav {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 15px;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
   font-size: 14px;
 }
 
-/* === BOTÕES DE AUTENTICAÇÃO MODERNOS === */
-.auth-buttons-container {
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  text-decoration: none;
+}
+
+.nav-item.router-link-active {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.nav-icon {
+  font-size: 16px;
+}
+
+.nav-text {
+  font-size: 14px;
+}
+
+/* === SEÇÃO DE AUTENTICAÇÃO === */
+.auth-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-entrar {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.btn-entrar-azul {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 500;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
   text-decoration: none;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-  min-width: 90px;
-  white-space: nowrap;
-  height: 38px;
-  color: #ffffff;
-  background: #4f46e5;
-  border: 1px solid #4f46e5;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
 }
 
-.btn-entrar-azul:hover {
-  color: #ffffff;
-  background: #4338ca;
-  border-color: #4338ca;
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+.btn-entrar:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  text-decoration: none;
   transform: translateY(-1px);
-  text-decoration: none;
 }
 
-.btn-entrar-azul:active {
-  transform: translateY(0px);
-  box-shadow: 0 1px 4px rgba(79, 70, 229, 0.2);
-}
-
-/* Ícones do botão */
-.btn-entrar-azul i {
-  font-size: 14px;
-  transition: transform 0.2s ease;
-}
-
-.btn-entrar-azul:hover i {
-  transform: translateX(-1px);
-}
-
-/* Responsividade para mobile */
-@media (max-width: 576px) {
-  .btn-entrar-azul {
-    min-width: 80px;
-    padding: 6px 12px;
-    font-size: 13px;
-    height: 34px;
-  }
-  
-  .btn-entrar-azul i {
-    font-size: 13px;
-  }
-}
-
-.avatar {
+.notification-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  background-color: #1976d2;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 8px;
   color: white;
-  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-/* Controle de visibilidade do dropdown */
-.dropdown-menu {
-  display: none;
+.notification-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* === MENU DO USUÁRIO === */
+.user-menu {
+  position: relative;
+}
+
+.user-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.user-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+  overflow: hidden;
+}
+
+.user-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.user-dropdown {
   position: absolute;
   top: 100%;
   right: 0;
-  z-index: 1000;
-  min-width: 280px;
-  padding: 0.5rem 0;
-  margin: 0.125rem 0 0;
-  background-color: #fff;
-  background-clip: padding-box;
-  border: 1px solid rgba(0, 0, 0, 0.175);
-  border-radius: 0.375rem;
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+  margin-top: 8px;
+  width: 250px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  z-index: 1001;
 }
 
-.dropdown-menu.show {
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f9fafb;
+}
+
+.user-avatar-large {
+  width: 40px;
+  height: 40px;
+  background: #4f46e5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+}
+
+.user-avatar-large-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.user-details strong {
   display: block;
+  color: #111827;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.user-details small {
+  color: #6b7280;
+  font-size: 12px;
 }
 
 .dropdown-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
-  padding: 0.5rem 1rem;
-  color: #212529;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  color: #374151;
   text-decoration: none;
-  background-color: transparent;
-  border: 0;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .dropdown-item:hover {
-  background-color: #f8f9fa;
-  color: #1e2125;
+  background: #f3f4f6;
+  text-decoration: none;
+  color: #374151;
 }
 
-.dropdown-item.text-danger {
-  color: #dc3545 !important;
+.logout-btn {
+  color: #dc2626 !important;
 }
 
-.dropdown-item.text-danger:hover {
-  background-color: #f8f9fa;
-  color: #dc3545 !important;
+.logout-btn:hover {
+  background: #fef2f2 !important;
 }
 
 .dropdown-divider {
-  height: 0;
-  margin: 0.5rem 0;
-  overflow: hidden;
-  border-top: 1px solid #dee2e6;
+  height: 1px;
+  background: #e5e7eb;
+  margin: 8px 0;
 }
 
-.dropdown-header {
-  display: block;
-  padding: 0.5rem 1rem;
-  margin-bottom: 0;
-  font-size: 0.875rem;
-  color: #6c757d;
-  white-space: nowrap;
+/* === MENU MOBILE === */
+.mobile-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mobile-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  gap: 5px;
+  flex-direction: column;
+}
+
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.mobile-nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  text-decoration: none;
+}
+
+.mobile-nav-item.router-link-active {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.mobile-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 10px 0;
+}
+
+.login-mobile {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  font-weight: 600;
+}
+
+.logout-mobile {
+  color: #fca5a5 !important;
+}
+
+/* === RESPONSIVIDADE === */
+
+/* Tablet */
+@media (max-width: 768px) {
+  .header-container {
+    padding: 0 15px;
+  }
+  
+  .brand-text {
+    display: none;
+  }
+  
+  .search-section {
+    max-width: 300px;
+    margin: 0 20px;
+  }
+  
+  .horizontal-nav {
+    display: none;
+  }
+  
+  .auth-section .btn-entrar span,
+  .auth-section .user-name {
+    display: none;
+  }
+  
+  .mobile-menu-btn {
+    display: flex;
+  }
+  
+  .mobile-menu {
+    display: flex;
+  }
+}
+
+/* Mobile */
+@media (max-width: 576px) {
+  .modern-header {
+    height: 70px;
+  }
+  
+  .header-container {
+    padding: 0 10px;
+  }
+  
+  .search-section {
+    max-width: 200px;
+    margin: 0 10px;
+  }
+  
+  .search-input {
+    height: 40px;
+    font-size: 13px;
+  }
+  
+  .brand-logo {
+    height: 35px;
+  }
 }
 </style>

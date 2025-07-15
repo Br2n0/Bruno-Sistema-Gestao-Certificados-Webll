@@ -294,8 +294,24 @@ const handleLogin = async () => {
     const result = await login(loginForm.email, loginForm.password)
     
     if (result.success) {
+      // Definir redirecionamento baseado no tipo de usuário
       const redirect = router.currentRoute.value.query.redirect as string
-      router.push(redirect || '/')
+      
+      if (redirect) {
+        // Se há uma rota de redirecionamento específica, usar ela
+        router.push(redirect)
+      } else {
+        // Redirecionamento baseado no role do usuário
+        const userRole = result.user?.role
+        
+        if (userRole === 'super-admin' || userRole === 'admin') {
+          // Admins vão para página inicial com acesso completo
+          router.push('/')
+        } else {
+          // Usuários comuns vão para cursos
+          router.push('/cursos')
+        }
+      }
     } else {
       // Mostrar erros de validação ou mensagem geral
       if (result.errors && result.errors.length > 0) {
@@ -320,9 +336,9 @@ const handleRegister = async () => {
     const result = await register(registerForm)
     
     if (result.success) {
-      // Redirecionar para home ou dashboard
+      // Após registro, redirecionar para cursos (usuários novos são sempre 'user')
       const redirect = router.currentRoute.value.query.redirect as string
-      router.push(redirect || '/')
+      router.push(redirect || '/cursos')
     } else {
       // Mostrar erros de validação ou mensagem geral
       if (result.errors && result.errors.length > 0) {

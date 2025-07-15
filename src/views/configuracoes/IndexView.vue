@@ -1,10 +1,7 @@
 <template>
   <div class="row">
     <div class="col-sm-12">
-      <div class="card">
-        <div class="card-header">
-          <h5>Configurações</h5>
-        </div>
+      <div class="card border-0" style="background-color: transparent;">
         <div class="card-body">
           <!-- Abas de navegação entre as diferentes seções de configurações -->
           <ul class="nav nav-tabs mb-4" id="configTabs" role="tablist">
@@ -67,8 +64,8 @@
                 <h6 class="border-bottom pb-2 mb-3">Informações do perfil</h6>
                 
                 <!-- Card para foto de perfil -->
-                <div class="card mb-3">
-                  <div class="card-header">
+                <div class="card mb-3 border-0" style="background-color: transparent;">
+                  <div class="card-header" style="background-color: transparent; border-bottom: 1px solid #dee2e6;">
                     <h6 class="mb-0">Foto de perfil</h6>
                   </div>
                   <div class="card-body text-center">
@@ -82,37 +79,48 @@
                       </button>
                     </div>
                     <small class="text-muted d-block mt-2">Clique para alterar sua foto</small>
+                    <!-- Input de arquivo oculto -->
+                    <input 
+                      ref="fileInput" 
+                      type="file" 
+                      accept="image/*" 
+                      style="display: none" 
+                      @change="handleFileUpload"
+                    >
                   </div>
                 </div>
                 
                 <!-- Card para informações pessoais -->
-                <div class="card mb-3">
-                  <div class="card-header">
+                <div class="card mb-3 border-0" style="background-color: transparent;">
+                  <div class="card-header" style="background-color: transparent; border-bottom: 1px solid #dee2e6;">
                     <h6 class="mb-0">Informações pessoais</h6>
                   </div>
                   <div class="card-body">
                     <form @submit.prevent="salvarPerfil">
-                      <!-- Nome completo -->
+                      <!-- Nome completo (readonly) -->
                       <div class="mb-3">
                         <label class="form-label">Nome completo</label>
                         <input 
                           type="text" 
-                          class="form-control" 
-                          v-model="config.perfil.nome"
+                          class="form-control form-control-readonly" 
+                          :value="config.perfil.nome"
+                          readonly
                           placeholder="Seu nome completo"
                         >
+                        <small class="text-muted">Nome não pode ser alterado</small>
                       </div>
                       
-                      <!-- Email -->
+                      <!-- Email (readonly) -->
                       <div class="mb-3">
                         <label class="form-label">Email</label>
                         <input 
                           type="email" 
-                          class="form-control" 
-                          v-model="config.perfil.email"
+                          class="form-control form-control-readonly" 
+                          :value="config.perfil.email"
+                          readonly
                           placeholder="seu@email.com"
                         >
-                        <small class="text-muted">Este email será usado para login e comunicações</small>
+                        <small class="text-muted">Email não pode ser alterado</small>
                       </div>
                       
                       <!-- Telefone -->
@@ -126,21 +134,9 @@
                         >
                       </div>
                       
-                      <!-- Bio ou descrição -->
-                      <div class="mb-3">
-                        <label class="form-label">Biografia</label>
-                        <textarea 
-                          class="form-control" 
-                          v-model="config.perfil.bio"
-                          rows="3"
-                          placeholder="Conte um pouco sobre você..."
-                        ></textarea>
-                      </div>
-                      
                       <!-- Botões de ação -->
                       <div class="mt-4">
                         <button type="submit" class="btn btn-primary">Salvar alterações</button>
-                        <button type="button" class="btn btn-outline-secondary ms-2">Cancelar</button>
                       </div>
                     </form>
                   </div>
@@ -575,12 +571,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router';
+import { useAuth } from '@/composables/useAuth';
 
 // Aba ativa nas configurações
 const activeTab = ref('perfil');
 const router = useRouter();
+const { currentUser, updateUserProfile } = useAuth();
+
+// Referência para o input de arquivo
+const fileInput = ref<HTMLInputElement | null>(null);
 
 // Variáveis para o formulário de alteração de senha
 const senhaAtual = ref('');
@@ -588,14 +589,12 @@ const novaSenha = ref('');
 const confirmarSenha = ref('');
 
 // Objeto que mantém todas as configurações do usuário
-// Em uma aplicação real, estas configurações seriam carregadas de uma API
 const config = reactive({
   perfil: {
-    nome: 'Usuário Demo',
-    email: 'usuario@exemplo.com',
-    telefone: '(11) 98765-4321',
-    bio: 'Estudante de tecnologia com interesse em desenvolvimento web e certificações.',
-    fotoUrl: '' // URL da foto do usuário
+    nome: '',
+    email: '',
+    telefone: '',
+    fotoUrl: ''
   },
   notificacoes: {
     email: {
@@ -631,6 +630,16 @@ const config = reactive({
   }
 });
 
+// Carregar dados do usuário ao montar o componente
+onMounted(() => {
+  if (currentUser.value) {
+    config.perfil.nome = currentUser.value.nome || '';
+    config.perfil.email = currentUser.value.email || '';
+    config.perfil.telefone = currentUser.value.telefone || '';
+    config.perfil.fotoUrl = currentUser.value.fotoUrl || '';
+  }
+});
+
 // Método para obter iniciais do usuário para avatar
 const getUserInitials = () => {
   if (!config.perfil.nome) return 'U';
@@ -640,6 +649,50 @@ const getUserInitials = () => {
     .join('')
     .substring(0, 2)
     .toUpperCase();
+};
+
+// Função para abrir o seletor de arquivos
+const alterarFoto = () => {
+  if (fileInput.value) {
+    fileInput.value.click();
+  }
+};
+
+// Função para lidar com o upload de arquivo
+const handleFileUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+  
+  if (file) {
+    // Verificar se é uma imagem
+    if (!file.type.startsWith('image/')) {
+      mostrarMensagem('Por favor, selecione apenas arquivos de imagem');
+      return;
+    }
+    
+    // Verificar tamanho do arquivo (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      mostrarMensagem('O arquivo deve ter no máximo 5MB');
+      return;
+    }
+    
+    // Criar URL temporária para preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        config.perfil.fotoUrl = e.target.result as string;
+        
+        // Salvar no localStorage (simulando upload)
+        if (currentUser.value) {
+          const userData = { ...currentUser.value, fotoUrl: config.perfil.fotoUrl };
+          updateUserProfile(userData);
+        }
+        
+        mostrarMensagem('Foto de perfil atualizada com sucesso!');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
 };
 
 // Valor numérico do tamanho da fonte
@@ -733,11 +786,26 @@ const formatarData = (dataString: string) => {
 
 // Simula o salvamento das configurações de perfil
 const salvarPerfil = () => {
-  // Em uma aplicação real, enviaríamos os dados para uma API
-  // Simulando com um timeout
+  if (currentUser.value) {
+    const userData = { 
+      ...currentUser.value, 
+      telefone: config.perfil.telefone,
+      fotoUrl: config.perfil.fotoUrl 
+    };
+    updateUserProfile(userData);
+  }
+  
   setTimeout(() => {
     mostrarMensagem('Perfil atualizado com sucesso!');
   }, 500);
+};
+
+// Cancelar edição
+const cancelarEdicao = () => {
+  // Restaurar dados originais
+  if (currentUser.value) {
+    config.perfil.telefone = currentUser.value.telefone || '';
+  }
 };
 
 // Simula o salvamento das configurações de notificações
@@ -810,12 +878,6 @@ const alterarSenha = () => {
     novaSenha.value = '';
     confirmarSenha.value = '';
   }, 500);
-};
-
-// Simula o upload de uma nova foto de perfil
-const alterarFoto = () => {
-  // Em uma aplicação real, abriríamos um seletor de arquivos
-  mostrarMensagem('Esta funcionalidade permitiria selecionar uma nova foto de perfil');
 };
 
 // Simula a ativação/desativação da autenticação de dois fatores
@@ -913,6 +975,12 @@ const mostrarMensagem = (mensagem: string) => {
   border-color: #1976d2;
 }
 
+.form-control-readonly {
+  background-color: #f8f9fa !important;
+  color: #6c757d !important;
+  cursor: not-allowed;
+}
+
 /* Estilos básicos para tema escuro */
 :global(.dark-theme) {
   background-color: #121212 !important;
@@ -920,9 +988,14 @@ const mostrarMensagem = (mensagem: string) => {
 }
 
 :global(.dark-theme .card) {
-  background-color: #1e1e1e !important;
+  background-color: transparent !important;
   border-color: #424242 !important;
   color: #e0e0e0 !important;
+}
+
+:global(.dark-theme .card-header) {
+  background-color: transparent !important;
+  border-bottom-color: #424242 !important;
 }
 
 :global(.dark-theme .form-control) {
@@ -958,5 +1031,10 @@ const mostrarMensagem = (mensagem: string) => {
 
 :global(.dark-theme .pc-content) {
   background-color: #121212 !important;
+}
+
+:global(.dark-theme .form-control-readonly) {
+  background-color: #2d2d2d !important;
+  color: #888888 !important;
 }
 </style> 

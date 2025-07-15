@@ -11,6 +11,7 @@ export interface User {
   updatedAt: Date
   isActive: boolean
   lastLogin?: Date
+  fotoUrl?: string
 }
 
 export interface RegisterForm {
