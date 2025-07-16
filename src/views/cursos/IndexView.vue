@@ -14,12 +14,21 @@
     <!-- Main Content -->
     <div v-else>
       <!-- Header -->
-      <div class="page-header mb-4">
-        <div class="row align-items-center">
-          <div class="col">
-            <h1 class="h3 mb-0 text-gray-800">Cursos Disponíveis</h1>
-            <p class="text-dark fs-6 mb-0">Encontre o curso ideal para seu desenvolvimento profissional</p>
-          </div>
+      <div class="page-header mb-4 d-flex align-items-start gap-4">
+        <div class="flex-grow-1">
+          <h1 class="h3 mb-0 text-gray-800">Cursos Disponíveis</h1>
+          <p class="text-dark fs-6 mb-0">Encontre o curso ideal para seu desenvolvimento profissional</p>
+        </div>
+        <!-- Atalhos laterais -->
+        <div class="d-flex gap-3 align-items-end" style="min-width: 300px;">
+          <router-link to="/meus-cursos" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm px-4 py-3 fw-semibold">
+            <i class="ti ti-book"></i>
+            Meus Cursos
+          </router-link>
+          <router-link to="/certificados" class="btn btn-success d-flex align-items-center gap-2 shadow-sm px-4 py-3 fw-semibold">
+            <i class="ti ti-id-badge"></i>
+            Certificados
+          </router-link>
         </div>
       </div>
 
@@ -56,53 +65,77 @@
 
       <!-- Filters -->
       <div class="filters-container mb-4">
-        <div class="row">
-          <div class="col-md-4">
-            <div class="form-group">
-              <label for="searchInput" class="form-label">Buscar curso</label>
-              <input 
-                v-model="searchTerm" 
-                type="text" 
-                class="form-control" 
-                id="searchInput"
-                placeholder="Digite o nome do curso..."
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div class="d-flex align-items-center gap-3 flex-wrap">
+            <span class="fw-bold text-dark">Filtrar por:</span>
+            <!-- Filtro Carga Horária -->
+            <div class="dropdown">
+              <button 
+                class="btn btn-outline-secondary dropdown-toggle" 
+                type="button" 
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
               >
+                {{ filtroCargaHorariaLabel }}
+                <i class="ti ti-chevron-down ms-1"></i>
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" @click.prevent="filtroCargaHoraria = ''">Todas</a></li>
+                <li><a class="dropdown-item" href="#" @click.prevent="filtroCargaHoraria = 'curto'">Até 20h</a></li>
+                <li><a class="dropdown-item" href="#" @click.prevent="filtroCargaHoraria = 'medio'">21h - 50h</a></li>
+                <li><a class="dropdown-item" href="#" @click.prevent="filtroCargaHoraria = 'longo'">Acima de 50h</a></li>
+              </ul>
+            </div>
+            <!-- Filtro Faixa de Preço -->
+            <div class="dropdown">
+              <button 
+                class="btn btn-outline-secondary dropdown-toggle" 
+                type="button" 
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                {{ filtroPrecoLabel }}
+                <i class="ti ti-chevron-down ms-1"></i>
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" @click.prevent="filtroPreco = ''">Todas</a></li>
+                <li><a class="dropdown-item" href="#" @click.prevent="filtroPreco = 'gratuito'">Gratuito</a></li>
+                <li><a class="dropdown-item" href="#" @click.prevent="filtroPreco = 'baixo'">Até R$ 200</a></li>
+                <li><a class="dropdown-item" href="#" @click.prevent="filtroPreco = 'medio'">R$ 201 - R$ 400</a></li>
+                <li><a class="dropdown-item" href="#" @click.prevent="filtroPreco = 'alto'">Acima de R$ 400</a></li>
+              </ul>
             </div>
           </div>
+          <span class="text-muted">
+            {{ filteredCursos.length }} de {{ cursos.length }} resultados encontrados
+          </span>
         </div>
       </div>
 
       <!-- Courses Grid -->
       <div class="courses-grid" v-if="filteredCursos.length > 0">
         <div v-for="curso in filteredCursos" :key="curso.id" class="course-card">
-          <div class="card h-100">
-            <div class="card-header text-white" :class="getHeaderColor(curso.id)">
-              <div class="d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">{{ curso.titulo }}</h5>
-                <i :class="getIconClass(curso.id)" class="fs-4"></i>
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="position-relative">
+              <div :class="`curso-header ${getHeaderColor(curso.id)} d-flex align-items-center justify-content-center`">
+                <i :class="`ti ${getIconClass(curso.id)} text-white fs-1`"></i>
+              </div>
+              <div class="position-absolute top-0 end-0 p-2">
+                <span class="badge bg-light text-dark fs-6 fw-bold">
+                  {{ curso.duracao }} horas
+                </span>
               </div>
             </div>
-            <div class="card-body">
-              <p class="card-text text-muted mb-3">{{ curso.descricao }}</p>
-              <div class="course-meta">
-                <div class="meta-item">
-                  <i class="ti ti-clock text-primary"></i>
-                  <span>{{ curso.duracao }}h</span>
-                </div>
-                <div class="meta-item" v-if="curso.instrutor">
-                  <i class="ti ti-user text-primary"></i>
-                  <span>{{ curso.instrutor }}</span>
-                </div>
-                <div class="meta-item">
-                  <i class="ti ti-tag text-primary"></i>
-                  <span>Geral</span>
-                </div>
-              </div>
-            </div>
-            <div class="card-footer bg-transparent">
+            
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title fw-bold mb-3">{{ curso.titulo }}</h5>
+              <p class="card-text text-muted mb-4">
+                {{ curso.descricao }}
+              </p>
+              
               <router-link 
                 :to="`/curso/${curso.id}`" 
-                class="btn btn-primary w-100"
+                class="btn btn-primary w-100 mt-auto"
               >
                 <i class="ti ti-play me-2"></i>
                 Começar Curso
@@ -133,6 +166,8 @@ const cursos = ref<Curso[]>([])
 const loading = ref(false)
 const error = ref('')
 const searchTerm = ref('')
+const filtroCargaHoraria = ref('')
+const filtroPreco = ref('')
 
 // Composables
 const route = useRoute()
@@ -151,17 +186,47 @@ const totalHoras = computed(() => {
   return cursos.value.reduce((total, curso) => total + curso.duracao, 0)
 })
 
+const filtroCargaHorariaLabel = computed(() => {
+  switch (filtroCargaHoraria.value) {
+    case 'curto': return 'Até 20h'
+    case 'medio': return '21h - 50h'
+    case 'longo': return 'Acima de 50h'
+    default: return 'Carga Horária'
+  }
+})
+
+const filtroPrecoLabel = computed(() => {
+  switch (filtroPreco.value) {
+    case 'gratuito': return 'Gratuito'
+    case 'baixo': return 'Até R$ 200'
+    case 'medio': return 'R$ 201 - R$ 400'
+    case 'alto': return 'Acima de R$ 400'
+    default: return 'Faixa de Preço'
+  }
+})
+
 const filteredCursos = computed(() => {
   let filtered = cursos.value
 
-  // Filtro de busca
-  if (searchTerm.value) {
-    const search = searchTerm.value.toLowerCase()
-    filtered = filtered.filter(curso =>
-      curso.titulo.toLowerCase().includes(search) ||
-      curso.descricao.toLowerCase().includes(search) ||
-      curso.instrutor.toLowerCase().includes(search)
-    )
+  // Filtro Carga Horária
+  if (filtroCargaHoraria.value) {
+    filtered = filtered.filter(curso => {
+      if (filtroCargaHoraria.value === 'curto') return curso.duracao <= 20
+      if (filtroCargaHoraria.value === 'medio') return curso.duracao > 20 && curso.duracao <= 50
+      if (filtroCargaHoraria.value === 'longo') return curso.duracao > 50
+      return true
+    })
+  }
+
+  // Filtro Preço
+  if (filtroPreco.value) {
+    filtered = filtered.filter(curso => {
+      if (filtroPreco.value === 'gratuito') return curso.preco === 0
+      if (filtroPreco.value === 'baixo') return curso.preco > 0 && curso.preco <= 200
+      if (filtroPreco.value === 'medio') return curso.preco > 200 && curso.preco <= 400
+      if (filtroPreco.value === 'alto') return curso.preco > 400
+      return true
+    })
   }
 
   return filtered
@@ -273,25 +338,51 @@ onMounted(() => {
 }
 
 .course-card {
-  transition: transform 0.2s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .course-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
 }
 
-.course-meta {
+.curso-header {
+  height: 120px;
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.meta-item {
-  display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #666;
+}
+
+.bg-primary {
+  background: #2c3cdc;
+}
+
+.bg-warning {
+  background: #ed8936;
+}
+
+.bg-info {
+  background: #0bc5ea;
+}
+
+.bg-success {
+  background: #48bb78;
+}
+
+.bg-danger {
+  background: #f56565;
+}
+
+.bg-dark {
+  background: #2d3748;
+}
+
+.badge {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 500;
 }
 
 .empty-state {
@@ -299,6 +390,20 @@ onMounted(() => {
   border-radius: 8px;
   padding: 3rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-light {
+  background: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  color: #222;
+  border-radius: 8px;
+  transition: box-shadow 0.2s, background 0.2s;
+}
+.btn-light:hover, .btn-light:focus {
+  background: #e9ecef;
+  color: #1a237e;
+  box-shadow: 0 2px 8px rgba(44,60,220,0.08);
+  text-decoration: none;
 }
 
 /* Responsive */

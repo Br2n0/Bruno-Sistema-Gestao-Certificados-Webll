@@ -37,27 +37,30 @@
     </div>
 
     <!-- Curso em Andamento -->
-    <div v-if="ultimoCursoEmAndamento" class="curso-destaque">
+    <div v-if="ultimoCursoEmAndamento && cursosEmAndamento.length > 0" class="curso-destaque">
       <div class="curso-destaque-header">
         <h3>Continue de onde parou</h3>
       </div>
       <div class="curso-destaque-content">
         <div class="curso-info">
-          <h4>{{ ultimoCursoEmAndamento.nome }}</h4>
-          <p class="text-muted">{{ ultimoCursoEmAndamento.instrutor }}</p>
+          <h4>{{ ultimoCursoEmAndamento.titulo }}</h4>
+          <div class="curso-details">
+            <span class="curso-detail">40h • {{ Math.max(0, 40 - Math.floor(40 * (ultimoCursoEmAndamento.progresso || 50) / 100)) }}h restantes</span>
+            <span class="curso-detail">Última atividade: {{ formatarData(ultimoCursoEmAndamento.dataInicio) }}</span>
+          </div>
           <div class="progress-container">
             <div class="progress">
               <div 
                 class="progress-bar" 
-                :style="`width: ${ultimoCursoEmAndamento.progresso}%`"
+                :style="`width: ${ultimoCursoEmAndamento.progresso || 50}%`"
               ></div>
             </div>
-            <span class="progress-text">{{ ultimoCursoEmAndamento.progresso }}% concluído</span>
+            <span class="progress-text">{{ ultimoCursoEmAndamento.progresso || 50 }}% concluído</span>
           </div>
         </div>
         <div class="curso-action">
           <router-link 
-            :to="`/cursos/${ultimoCursoEmAndamento.cursoId}/estudo`" 
+            :to="`/meus-cursos`" 
             class="btn btn-primary"
           >
             Continuar
@@ -78,6 +81,16 @@ interface Props {
 }
 
 defineProps<Props>()
+
+// Função para formatar data
+const formatarData = (dataISO: string) => {
+  try {
+    const data = new Date(dataISO)
+    return data.toLocaleDateString('pt-BR')
+  } catch {
+    return 'Data recente'
+  }
+}
 </script>
 
 <style scoped>

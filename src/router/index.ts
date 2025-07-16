@@ -60,6 +60,11 @@ const router = createRouter({
       name: 'detalhe-certificado',
       component: () => import('../views/certificados/DetalheView.vue'),
     },
+    {
+      path: '/certificados/validar',
+      name: 'validar-certificado',
+      component: () => import('../views/certificados/ValidarView.vue'),
+    },
     
     // ⚙️ Configurações Pessoais
     {
@@ -104,6 +109,20 @@ const router = createRouter({
       path: '/admin/certificados',
       name: 'admin-certificados',
       component: () => import('../views/admin/CertificadosView.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true }
+    },
+    
+    // 🎓 Rotas Acadêmicas
+    {
+      path: '/academico/cursos/cadastro',
+      name: 'cadastro-curso',
+      component: () => import('../views/academico/cursos/CadastroCurso.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: '/academico/cursos/lista',
+      name: 'lista-cursos',
+      component: () => import('../views/academico/cursos/ListaCursos.vue'),
       meta: { requiresAuth: true, requiresAdmin: true }
     },
 

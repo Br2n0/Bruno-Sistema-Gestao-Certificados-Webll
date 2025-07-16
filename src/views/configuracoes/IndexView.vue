@@ -43,6 +43,19 @@
                 </button>
               </div>
               <p class="text-muted small mt-2">Clique para alterar sua foto</p>
+              
+              <!-- Botão de salvar foto -->
+              <button 
+                v-if="config.perfil.fotoUrl && fotoAlterada" 
+                class="btn btn-sm btn-success mt-2" 
+                @click="salvarFoto"
+                :disabled="salvandoFoto"
+              >
+                <span v-if="salvandoFoto" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                <i v-else class="ti ti-device-floppy"></i>
+                {{ salvandoFoto ? 'Salvando...' : '' }}
+              </button>
+              
               <input 
                 ref="fileInput" 
                 type="file" 
@@ -80,37 +93,20 @@
                   >
                   <small class="text-muted">Email não pode ser alterado</small>
                 </div>
-                
-                <!-- Telefone -->
-                <div class="col-md-6 mb-3">
-                  <label class="form-label fw-medium">Telefone</label>
-                  <input 
-                    type="tel" 
-                    class="form-control" 
-                    v-model="config.perfil.telefone"
-                    placeholder="(00) 00000-0000"
-                  >
-                </div>
 
                 <!-- Data de cadastro (readonly) -->
-                <div class="col-md-6 mb-3">
+                <div class="col-12 mb-3">
                   <label class="form-label fw-medium">Aluno desde</label>
                   <input 
                     type="text" 
                     class="form-control form-control-readonly" 
-                    value="Novembro 2023"
+                    value="2025"
                     readonly
                   >
                 </div>
               </div>
 
-              <!-- Botão de salvar -->
-              <div class="mt-3">
-                <button type="submit" class="btn btn-primary">
-                  <i class="ti ti-device-floppy me-2"></i>
-                  Salvar Alterações
-                </button>
-              </div>
+              <!-- Botão de salvar removido - redundante -->
             </form>
           </div>
         </div>
@@ -233,6 +229,8 @@ const { currentUser, updateUserProfile, alterarSenhaUsuario } = useAuth()
 const mostrarSucesso = ref(false)
 const mensagemSucesso = ref('')
 const fileInput = ref<HTMLInputElement | null>(null)
+const salvandoFoto = ref(false)
+const fotoAlterada = ref(false)
 
 // Estados para senha
 const senhaAtual = ref('')
@@ -247,7 +245,6 @@ const config = reactive({
   perfil: {
     nome: '',
     email: '',
-    telefone: '',
     fotoUrl: ''
   }
 })
@@ -259,7 +256,6 @@ onMounted(() => {
   if (currentUser.value) {
     config.perfil.nome = currentUser.value.nome || ''
     config.perfil.email = currentUser.value.email || ''
-    config.perfil.telefone = currentUser.value.telefone || ''
     config.perfil.fotoUrl = currentUser.value.fotoUrl || ''
   }
 })
@@ -291,8 +287,48 @@ const handleFileUpload = (event: Event) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       config.perfil.fotoUrl = e.target?.result as string
+      fotoAlterada.value = true
     }
     reader.readAsDataURL(file)
+  }
+}
+
+// Salvar foto no banco
+const salvarFoto = async () => {
+  if (!currentUser.value?.id || !config.perfil.fotoUrl) return
+  
+  salvandoFoto.value = true
+  
+  try {
+    // Chamar API para atualizar foto
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/Alunos/${currentUser.value.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        FotoUrl: config.perfil.fotoUrl
+      })
+    })
+    
+    if (response.ok) {
+      mostrarMensagem('Foto salva com sucesso!')
+      fotoAlterada.value = false
+      
+      // Atualizar dados do usuário no localStorage
+      const userData = { 
+        ...currentUser.value, 
+        fotoUrl: config.perfil.fotoUrl 
+      }
+      updateUserProfile(userData)
+    } else {
+      throw new Error('Erro ao salvar foto')
+    }
+  } catch (error) {
+    console.error('Erro ao salvar foto:', error)
+    mostrarMensagem('Erro ao salvar foto. Tente novamente.', 'error')
+  } finally {
+    salvandoFoto.value = false
   }
 }
 
@@ -301,7 +337,6 @@ const salvarPerfil = () => {
   if (currentUser.value) {
     const userData = { 
       ...currentUser.value, 
-      telefone: config.perfil.telefone,
       fotoUrl: config.perfil.fotoUrl 
     }
     updateUserProfile(userData)
@@ -373,7 +408,7 @@ const alterarSenha = async () => {
       novaSenha.value = ''
       confirmarSenha.value = ''
     } else {
-      mostrarMensagem(resultado.message, 'error')
+      mostrarMensagem(resultado.message || 'Erro ao alterar senha', 'error')
     }
   } catch (error) {
     mostrarMensagem('Erro ao alterar senha. Tente novamente.', 'error')

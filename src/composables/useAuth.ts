@@ -17,6 +17,7 @@ interface CurrentUser {
   nome: string
   email: string
   dataCadastro: string
+  fotoUrl?: string
 }
 
 // Estado global de autenticação
@@ -60,7 +61,8 @@ export function useAuth() {
     id: aluno.ID,
     nome: aluno.Nome,
     email: aluno.Email,
-    dataCadastro: aluno.Data_Cadastro || new Date().toISOString() // Fallback se undefined
+    dataCadastro: aluno.Data_Cadastro || new Date().toISOString(), // Fallback se undefined
+    fotoUrl: aluno.FotoUrl || undefined
   })
 
   // Inicializar autenticação - verificar se há dados salvos
@@ -83,7 +85,8 @@ export function useAuth() {
         id: parseInt(userId || '0'),
         nome: userName,
         email: userEmail,
-        dataCadastro: localStorage.getItem('current_user_date') || new Date().toISOString()
+        dataCadastro: localStorage.getItem('current_user_date') || new Date().toISOString(),
+        fotoUrl: localStorage.getItem('current_user_foto') || undefined
       }
       authState.value.isAuthenticated = true
       
@@ -138,6 +141,9 @@ export function useAuth() {
       localStorage.setItem('current_user_name', user.Nome)
       localStorage.setItem('current_user_id', user.ID.toString())
       localStorage.setItem('current_user_date', user.Data_Cadastro || new Date().toISOString())
+      if (user.FotoUrl) {
+        localStorage.setItem('current_user_foto', user.FotoUrl)
+      }
       
       console.log('💾 [AUTH] Dados salvos no localStorage')
       
@@ -227,6 +233,9 @@ export function useAuth() {
       localStorage.setItem('current_user_name', user.Nome)
       localStorage.setItem('current_user_id', user.ID.toString())
       localStorage.setItem('current_user_date', user.Data_Cadastro || new Date().toISOString())
+      if (user.FotoUrl) {
+        localStorage.setItem('current_user_foto', user.FotoUrl)
+      }
       
       console.log('💾 [AUTH] Dados salvos no localStorage')
       
@@ -290,6 +299,7 @@ export function useAuth() {
     localStorage.removeItem('current_user_name')
     localStorage.removeItem('current_user_id')
     localStorage.removeItem('current_user_date')
+    localStorage.removeItem('current_user_foto')
     
     // Redirecionar para home
     router.push('/')
@@ -307,6 +317,44 @@ export function useAuth() {
         ...authState.value.user,
         ...userData
       }
+      
+      // Salvar fotoUrl no localStorage se fornecida
+      if (userData.fotoUrl !== undefined) {
+        if (userData.fotoUrl) {
+          localStorage.setItem('current_user_foto', userData.fotoUrl)
+        } else {
+          localStorage.removeItem('current_user_foto')
+        }
+      }
+    }
+  }
+
+  // Função para alterar senha
+  const alterarSenhaUsuario = async (senhaAtual: string, novaSenha: string): Promise<{ success: boolean; message?: string }> => {
+    if (!currentUser.value?.id) {
+      return { success: false, message: 'Usuário não encontrado' }
+    }
+
+    try {
+      const response = await fetch(`${API_CONFIG.baseURL}/api/Alunos/${currentUser.value.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          Senha: novaSenha
+        })
+      })
+
+      if (response.ok) {
+        return { success: true, message: 'Senha alterada com sucesso!' }
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        return { success: false, message: errorData.message || 'Erro ao alterar senha' }
+      }
+    } catch (error) {
+      console.error('Erro ao alterar senha:', error)
+      return { success: false, message: 'Erro de conexão. Tente novamente.' }
     }
   }
 
@@ -323,6 +371,7 @@ export function useAuth() {
     register,
     logout,
     hasPermission,
-    updateUserProfile
+    updateUserProfile,
+    alterarSenhaUsuario
   }
 } 

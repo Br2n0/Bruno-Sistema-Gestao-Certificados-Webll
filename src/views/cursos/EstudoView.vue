@@ -158,10 +158,6 @@
                     <i class="ti ti-certificate text-primary me-2"></i>
                     <span>Certificado Incluído</span>
                   </div>
-                  <div class="info-item">
-                    <i class="ti ti-device-mobile text-primary me-2"></i>
-                    <span>Acesso Mobile</span>
-                  </div>
                 </div>
               </div>
             </div>

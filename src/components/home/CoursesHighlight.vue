@@ -8,7 +8,7 @@
       </router-link>
     </div>
     
-    <div class="row">
+    <div class="row" v-if="cursos.length > 0">
       <div 
         v-for="curso in cursos" 
         :key="curso.id" 
@@ -33,14 +33,20 @@
             </p>
             
             <router-link 
-              :to="`/cursos/${curso.id}/estudo`" 
+              :to="`/curso/${curso.id}`" 
               class="btn btn-primary w-100 mt-auto"
             >
+              <i class="ti ti-play me-2"></i>
               {{ buttonText }}
             </router-link>
           </div>
         </div>
       </div>
+    </div>
+    
+    <!-- Mensagem quando não há cursos -->
+    <div v-else class="text-center py-5">
+      <p class="text-muted">Nenhum curso disponível no momento.</p>
     </div>
   </section>
 </template>
@@ -133,6 +139,7 @@ const getAreaLabel = (area: string) => {
 .curso-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .curso-card:hover {

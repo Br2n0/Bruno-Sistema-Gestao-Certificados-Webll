@@ -23,6 +23,7 @@ const title = computed(() => {
     'meus-cursos': 'Meus Cursos',
     'curso-estudo': 'Ambiente de Aprendizagem',
     'certificados': 'Meus Certificados',
+    'validar-certificado': 'Validar Certificado',
     'configuracoes': 'Configurações',
     'configuracoes-perfil': 'Configurações do Perfil',
     'configuracoes-notificacoes': 'Notificações',
@@ -30,10 +31,13 @@ const title = computed(() => {
     'detalhe-certificado': 'Detalhes do Certificado',
     'admin-usuarios': 'Gestão de Usuários',
     'admin-cursos': 'Gestão de Cursos',
-    'admin-certificados': 'Gestão de Certificados'
+    'admin-certificados': 'Gestão de Certificados',
+    'cadastro-curso': 'Cadastrar Curso',
+    'lista-cursos': 'Lista de Cursos'
   }
   
-  return routeMap[routeName] || 'Página'
+  // Se não encontrar a rota, usar o path como fallback
+  return routeMap[routeName] || route.path.charAt(1).toUpperCase() + route.path.slice(2).replace(/-/g, ' ')
 })
 </script>
 

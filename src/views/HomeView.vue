@@ -17,8 +17,11 @@
     <CoursesHighlight 
       :cursos="cursosDestaque"
       :section-title="isAuthenticated ? 'Descubra Novos Cursos' : 'Cursos em Destaque'"
-      :button-text="isAuthenticated ? 'Acessar' : 'Ver Curso'"
+      :button-text="'Começar Curso'"
     />
+
+    <!-- Hero Section para usuários logados (após os cursos) -->
+    <HeroSection v-if="isAuthenticated" />
 
     <!-- Benefícios (apenas para não logados) -->
     <BenefitsSection v-if="!isAuthenticated" />
@@ -59,41 +62,52 @@ const cursosDisponiveis = ref<any[]>([])
 const cursosDestaque = computed(() => {
   if (cursosDisponiveis.value.length === 0) return []
   
+  // Funções auxiliares para cores e ícones
+  const getHeaderColor = (id: number): string => {
+    const colors = ['bg-primary', 'bg-warning', 'bg-info', 'bg-success', 'bg-danger', 'bg-dark']
+    return colors[id % colors.length]
+  }
+
+  const getIconClass = (id: number): string => {
+    const icons = ['ti-code', 'ti-book', 'ti-database', 'ti-chart-line', 'ti-users', 'ti-settings']
+    return icons[id % icons.length]
+  }
+  
   if (isAuthenticated.value) {
     const cursosMatriculados = cursosEmAndamento.value.map((m: any) => m.cursoId)
       .concat(certificadosObtidos.value.map((c: any) => c.id))
     
     return cursosDisponiveis.value
-      .filter((curso: any) => !cursosMatriculados.includes(curso.id))
+      .filter((curso: any) => !cursosMatriculados.includes(curso.ID))
       .slice(0, 3)
       .map((curso: any) => ({
         id: curso.ID,
-        nome: curso.Titulo,
+        titulo: curso.Titulo,
         descricao: curso.Descricao || 'Descrição não disponível',
-        cargaHoraria: curso.Duracao,
-        instrutor: curso.Instrutor || 'Instrutor não informado',
-        categoria: 'Geral'
+        duracao: curso.Duracao,
+        categoria: 'Geral',
+        headerColor: getHeaderColor(curso.ID),
+        icon: getIconClass(curso.ID)
       }))
   }
   
   return cursosDisponiveis.value.slice(0, 3).map((curso: any) => ({
     id: curso.ID,
-    nome: curso.Titulo,
+    titulo: curso.Titulo,
     descricao: curso.Descricao || 'Descrição não disponível',
-    cargaHoraria: curso.Duracao,
-    instrutor: curso.Instrutor || 'Instrutor não informado',
-    categoria: 'Geral'
+    duracao: curso.Duracao,
+    categoria: 'Geral',
+    headerColor: getHeaderColor(curso.ID),
+    icon: getIconClass(curso.ID)
   }))
 })
 
 // Método para carregar cursos
 const carregarCursos = async () => {
   try {
-    cursosDisponiveis.value = await apiService.getCursos()
-    console.log('✅ Cursos carregados:', cursosDisponiveis.value.length)
+    const cursos = await apiService.getCursos()
+    cursosDisponiveis.value = cursos
   } catch (error) {
-    console.error('❌ Erro ao carregar cursos:', error)
-    // Se for erro de conexão, tentar novamente depois
     cursosDisponiveis.value = []
   }
 }
