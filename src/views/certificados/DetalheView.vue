@@ -20,7 +20,7 @@
           
           <div v-else>
             <div class="row mb-4">
-              <div class="col-md-8">
+              <div class="col-md-5">
                 <h3 class="mb-3">{{ certificado.nome }}</h3>
                 <div class="d-flex flex-wrap gap-2 mb-3">
                   <span class="badge bg-primary">{{ certificado.area }}</span>
@@ -32,13 +32,21 @@
                 </div>
                 <p class="lead">{{ certificado.descricao }}</p>
               </div>
-              <div class="col-md-4 text-center">
+              <div class="col-md-7 text-center">
                 <div class="border p-3 rounded bg-light">
-                  <img src="@/assets/images/certificado-template.png" alt="Certificado" class="img-fluid mb-3" />
+                  <!-- Certificado com imagem de fundo e texto sobreposto -->
+                  <div class="certificado-container mb-3">
+                    <img src="@/assets/images/certificado-template.png" class="certificado-bg" alt="Certificado" />
+                    <div class="certificado-texto-sobreposto">
+                      <div class="nome-aluno">{{ certificado?.alunoNome || 'Nome do Aluno' }}</div>
+                      <div class="nome-curso">{{ certificado?.nome || 'Nome do Curso' }}</div>
+                    </div>
+                  </div>
+                  
                   <div class="d-grid gap-2">
                     <button 
                       class="btn btn-primary" 
-                      :disabled="!certificado.disponivel"
+                      :disabled="!certificado?.disponivel"
                       @click="baixarCertificado">
                       <i class="ti ti-download me-2"></i>Baixar Certificado
                     </button>
@@ -166,6 +174,7 @@ interface Certificado {
   validade: string
   conteudo: string[]
   atividades: Atividade[]
+  alunoNome?: string // Adicionado para o novo template
 }
 
 export default defineComponent({
@@ -211,6 +220,7 @@ export default defineComponent({
                 status: 'Concluído',
               }
             ],
+            alunoNome: certificado.AlunoNome, // Nome real do aluno do backend
           }
         }
       } catch (error) {
@@ -245,8 +255,55 @@ export default defineComponent({
       }
     },
     baixarCertificado() {
-      // Implementação futura: lógica para download do certificado
-      alert('Função de download será implementada na integração com o backend.')
+      if (!this.certificado) {
+        alert('Certificado não disponível')
+        return
+      }
+
+      // Import dinâmico do Vite para pegar o caminho real do asset
+      import('@/assets/images/certificado-template.png').then(module => {
+        const certificadoImg = module.default
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          alert('Erro ao gerar certificado')
+          return
+        }
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        img.onload = () => {
+          canvas.width = img.width
+          canvas.height = img.height
+          ctx.drawImage(img, 0, 0)
+          // Aumentar tamanho da fonte para o PDF
+          ctx.font = 'bold 64px Arial'
+          ctx.fillStyle = '#1c549c'
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'middle'
+          const nomeAluno = this.certificado?.alunoNome || 'Nome do Aluno'
+          ctx.fillText(nomeAluno, canvas.width / 2, canvas.height * 0.45)
+          const nomeCurso = this.certificado?.nome || 'Nome do Curso'
+          ctx.fillText(nomeCurso, canvas.width / 2, canvas.height * 0.59)
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const url = URL.createObjectURL(blob)
+              const link = document.createElement('a')
+              link.href = url
+              link.download = `certificado-${nomeAluno}-${nomeCurso}.png`
+              document.body.appendChild(link)
+              link.click()
+              document.body.removeChild(link)
+              URL.revokeObjectURL(url)
+            }
+          }, 'image/png')
+        }
+        img.onerror = () => {
+          alert('Erro ao carregar imagem do certificado')
+        }
+        img.src = certificadoImg
+      }).catch(() => {
+        alert('Erro ao carregar template do certificado')
+      })
     },
     verificarAutenticidade() {
       // Implementação futura: lógica para verificação de autenticidade
@@ -259,5 +316,50 @@ export default defineComponent({
 <style scoped>
 .badge {
   font-size: 0.85rem;
+}
+
+/* Estilos para o certificado com imagem de fundo */
+.certificado-container {
+  position: relative;
+  width: 100%;
+  max-width: 900px; /* Aumentado de 800px para 900px */
+  margin: 0 auto;
+}
+
+.certificado-bg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.certificado-texto-sobreposto {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.nome-aluno {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.7rem;
+  font-weight: bold;
+  color: #1c549c;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.nome-curso {
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1c549c;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
 </style> 
