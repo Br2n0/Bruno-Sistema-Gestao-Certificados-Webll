@@ -46,18 +46,7 @@
               <div v-if="registerValidation.email" class="field-error">{{ registerValidation.email }}</div>
             </div>
 
-            <div class="form-group">
-              <label>Celular</label>
-              <input
-                type="tel"
-                v-model="registerForm.telefone"
-                placeholder="(00) 00000-0000"
-                :class="{ 'error': registerValidation.telefone }"
-                @blur="formatPhoneNumber"
-                required
-              >
-              <div v-if="registerValidation.telefone" class="field-error">{{ registerValidation.telefone }}</div>
-            </div>
+
 
             <div class="form-group">
               <label>Senha cadastro</label>
@@ -209,13 +198,12 @@ const registerError = ref('')
 const loginError = ref('')
 
 // Importar funções de validação
-import { validateEmail, validatePassword, validatePhone, formatPhone } from '@/utils/autenticacao'
+import { validateEmail, validatePassword } from '@/utils/autenticacao'
 
 // Formulários
 const registerForm = reactive({
   nome: '',
   email: '',
-  telefone: '',
   password: '',
   confirmPassword: '',
   terms: false
@@ -240,10 +228,7 @@ const registerValidation = computed(() => {
     errors.email = 'Email inválido'
   }
   
-  // Validar telefone
-  if (registerForm.telefone && !validatePhone(registerForm.telefone)) {
-    errors.telefone = 'Telefone deve estar no formato (00) 00000-0000'
-  }
+
   
   // Validar senha
   if (registerForm.password) {
@@ -273,10 +258,7 @@ const loginValidation = computed(() => {
   return errors
 })
 
-// Formatação automática do telefone
-const formatPhoneNumber = () => {
-  registerForm.telefone = formatPhone(registerForm.telefone)
-}
+
 
 // Handlers de login
 const handleLogin = async () => {
@@ -287,34 +269,15 @@ const handleLogin = async () => {
     const result = await login(loginForm.email, loginForm.password)
     
     if (result.success) {
-      // Definir redirecionamento baseado no tipo de usuário
+      // Redirecionar para página inicial após login
       const redirect = router.currentRoute.value.query.redirect as string
-      
-      if (redirect) {
-        // Se há uma rota de redirecionamento específica, usar ela
-        router.push(redirect)
-      } else {
-        // Redirecionamento baseado no role do usuário
-        const userRole = result.user?.role
-        
-        if (userRole === 'super-admin' || userRole === 'admin') {
-          // Admins vão para página inicial com acesso completo
-          router.push('/')
-        } else {
-          // Usuários comuns vão para cursos
-          router.push('/cursos')
-        }
-      }
+      router.push(redirect || '/')
     } else {
-      // Mostrar erros de validação ou mensagem geral
-      if (result.errors && result.errors.length > 0) {
-        loginError.value = result.errors.map(err => err.message).join(', ')
-      } else {
-        loginError.value = result.message || 'Email ou senha inválidos'
-      }
+      loginError.value = result.message || 'Email ou senha incorretos'
     }
   } catch (err) {
-    loginError.value = 'Erro ao fazer login. Tente novamente.'
+    console.error('Erro no handleLogin:', err)
+    loginError.value = 'Erro ao fazer login. Verifique sua conexão e tente novamente.'
   } finally {
     isLoginLoading.value = false
   }
@@ -326,23 +289,19 @@ const handleRegister = async () => {
   isRegisterLoading.value = true
   
   try {
-    const result = await register(registerForm)
+    const result = await register(registerForm.nome, registerForm.email, registerForm.password)
     
     if (result.success) {
-      // Após registro, redirecionar para cursos (usuários novos são sempre 'user')
+      // Após registro, redirecionar para página inicial
       const redirect = router.currentRoute.value.query.redirect as string
-      router.push(redirect || '/cursos')
+      router.push(redirect || '/')
     } else {
-      // Mostrar erros de validação ou mensagem geral
-      if (result.errors && result.errors.length > 0) {
-        registerError.value = result.errors.map(err => err.message).join(', ')
-      } else {
-        registerError.value = result.message || 'Erro ao criar conta'
-      }
+      registerError.value = result.message || 'Erro ao criar conta'
     }
     
   } catch (err) {
-    registerError.value = 'Erro ao criar conta. Tente novamente.'
+    console.error('Erro no handleRegister:', err)
+    registerError.value = 'Erro ao criar conta. Verifique sua conexão e tente novamente.'
   } finally {
     isRegisterLoading.value = false
   }

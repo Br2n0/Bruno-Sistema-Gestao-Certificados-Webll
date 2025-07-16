@@ -78,7 +78,7 @@
           <div class="card h-100">
             <div class="card-header text-white" :class="getHeaderColor(curso.id)">
               <div class="d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">{{ curso.nome }}</h5>
+                <h5 class="card-title mb-0">{{ curso.titulo }}</h5>
                 <i :class="getIconClass(curso.id)" class="fs-4"></i>
               </div>
             </div>
@@ -87,7 +87,7 @@
               <div class="course-meta">
                 <div class="meta-item">
                   <i class="ti ti-clock text-primary"></i>
-                  <span>{{ curso.cargaHoraria }}h</span>
+                  <span>{{ curso.duracao }}h</span>
                 </div>
                 <div class="meta-item" v-if="curso.instrutor">
                   <i class="ti ti-user text-primary"></i>
@@ -95,7 +95,7 @@
                 </div>
                 <div class="meta-item">
                   <i class="ti ti-tag text-primary"></i>
-                  <span>{{ curso.categoria }}</span>
+                  <span>Geral</span>
                 </div>
               </div>
             </div>
@@ -126,11 +126,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
-import apiService from '@/services/apiService'
-import type { CursoDTO } from '@/services/apiService'
+import { dataService, type Curso } from '@/services/dataService'
 
 // Dados reativos
-const cursos = ref<CursoDTO[]>([])
+const cursos = ref<Curso[]>([])
 const loading = ref(false)
 const error = ref('')
 const searchTerm = ref('')
@@ -144,12 +143,12 @@ const { isAuthenticated } = useAuth()
 const cursosAtivos = computed(() => cursos.value.length)
 
 const totalInstrutores = computed(() => {
-  const instrutores = new Set(cursos.value.map(c => c.Instrutor).filter(Boolean))
+  const instrutores = new Set(cursos.value.map(c => c.instrutor).filter(Boolean))
   return instrutores.size
 })
 
 const totalHoras = computed(() => {
-  return cursos.value.reduce((total, curso) => total + curso.Duracao, 0)
+  return cursos.value.reduce((total, curso) => total + curso.duracao, 0)
 })
 
 const filteredCursos = computed(() => {
@@ -159,20 +158,13 @@ const filteredCursos = computed(() => {
   if (searchTerm.value) {
     const search = searchTerm.value.toLowerCase()
     filtered = filtered.filter(curso =>
-      curso.Titulo.toLowerCase().includes(search) ||
-      (curso.Descricao && curso.Descricao.toLowerCase().includes(search)) ||
-      (curso.Instrutor && curso.Instrutor.toLowerCase().includes(search))
+      curso.titulo.toLowerCase().includes(search) ||
+      curso.descricao.toLowerCase().includes(search) ||
+      curso.instrutor.toLowerCase().includes(search)
     )
   }
 
-  return filtered.map(curso => ({
-    id: curso.ID,
-    nome: curso.Titulo,
-    descricao: curso.Descricao || 'Descrição não disponível',
-    cargaHoraria: curso.Duracao,
-    instrutor: curso.Instrutor || 'Instrutor não informado',
-    categoria: 'Geral' // A API não tem categoria ainda
-  }))
+  return filtered
 })
 
 // Métodos para UI
@@ -192,7 +184,7 @@ const carregarCursos = async () => {
     loading.value = true
     error.value = ''
     
-    cursos.value = await apiService.getCursos()
+    cursos.value = await dataService.getCursos()
     
   } catch (err: any) {
     console.error('Erro ao carregar cursos:', err)

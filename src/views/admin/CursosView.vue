@@ -33,53 +33,17 @@
       </div>
       
       <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-          <div class="card-body">
-            <div class="row no-gutters align-items-center">
-              <div class="col mr-2">
-                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                  Cursos Ativos
-                </div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ cursosAtivos }}</div>
-              </div>
-              <div class="col-auto">
-                <i class="fas fa-check-circle fa-2x text-gray-300"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2">
-          <div class="card-body">
-            <div class="row no-gutters align-items-center">
-              <div class="col mr-2">
-                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                  Cursos Inativos
-                </div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ cursosInativos }}</div>
-              </div>
-              <div class="col-auto">
-                <i class="fas fa-pause-circle fa-2x text-gray-300"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-info shadow h-100 py-2">
           <div class="card-body">
             <div class="row no-gutters align-items-center">
               <div class="col mr-2">
                 <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                  Categorias
+                  Total de Horas
                 </div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalCategorias }}</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalHoras }}</div>
               </div>
               <div class="col-auto">
-                <i class="fas fa-layer-group fa-2x text-gray-300"></i>
+                <i class="fas fa-clock fa-2x text-gray-300"></i>
               </div>
             </div>
           </div>
@@ -98,26 +62,20 @@
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Nome</th>
+                <th>Título</th>
                 <th>Instrutor</th>
-                <th>Categoria</th>
-                <th>Carga Horária</th>
-                <th>Status</th>
+                <th>Duração (h)</th>
+                <th>Preço</th>
                 <th>Ações</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="curso in cursos" :key="curso.id">
                 <td>{{ curso.id }}</td>
-                <td>{{ curso.nome }}</td>
-                <td>{{ curso.instrutor }}</td>
-                <td>{{ curso.categoria }}</td>
-                <td>{{ curso.cargaHoraria }}h</td>
-                <td>
-                  <span :class="['badge', curso.status === 'ativo' ? 'badge-success' : 'badge-secondary']">
-                    {{ curso.status }}
-                  </span>
-                </td>
+                <td>{{ curso.titulo }}</td>
+                <td>{{ curso.instrutor || '-' }}</td>
+                <td>{{ curso.duracao }}h</td>
+                <td>{{ curso.preco === 0 ? 'Gratuito' : `R$ ${curso.preco.toFixed(2)}` }}</td>
                 <td>
                   <button 
                     type="button"
@@ -157,22 +115,22 @@
             <form @submit.prevent="saveCurso">
               <div class="row">
                 <div class="col-md-8 mb-3">
-                  <label for="nome" class="form-label">Nome do Curso *</label>
+                  <label for="titulo" class="form-label">Título do Curso *</label>
                   <input 
                     type="text" 
                     class="form-control" 
-                    id="nome"
-                    v-model="cursoForm.nome"
+                    id="titulo"
+                    v-model="cursoForm.titulo"
                     required
                   >
                 </div>
                 <div class="col-md-4 mb-3">
-                  <label for="cargaHoraria" class="form-label">Carga Horária *</label>
+                  <label for="duracao" class="form-label">Duração (horas) *</label>
                   <input 
                     type="number" 
                     class="form-control" 
-                    id="cargaHoraria"
-                    v-model.number="cursoForm.cargaHoraria"
+                    id="duracao"
+                    v-model.number="cursoForm.duracao"
                     min="1"
                     required
                   >
@@ -192,65 +150,24 @@
               
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label for="instrutor" class="form-label">Instrutor *</label>
+                  <label for="instrutor" class="form-label">Instrutor</label>
                   <input 
                     type="text" 
                     class="form-control" 
                     id="instrutor"
                     v-model="cursoForm.instrutor"
-                    required
                   >
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label for="categoria" class="form-label">Categoria *</label>
-                  <select 
-                    class="form-control" 
-                    id="categoria"
-                    v-model="cursoForm.categoria"
-                    required
-                  >
-                    <option value="">Selecione uma categoria</option>
-                    <option value="Tecnologia">Tecnologia</option>
-                    <option value="Design">Design</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Negócios">Negócios</option>
-                    <option value="Data Science">Data Science</option>
-                    <option value="Idiomas">Idiomas</option>
-                    <option value="Outros">Outros</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div class="row">
-                <div class="col-md-4 mb-3">
-                  <label for="dataInicio" class="form-label">Data de Início</label>
+                  <label for="preco" class="form-label">Preço (R$)</label>
                   <input 
-                    type="date" 
+                    type="number" 
                     class="form-control" 
-                    id="dataInicio"
-                    v-model="cursoForm.dataInicio"
+                    id="preco"
+                    v-model.number="cursoForm.preco"
+                    min="0"
+                    step="0.01"
                   >
-                </div>
-                <div class="col-md-4 mb-3">
-                  <label for="dataFim" class="form-label">Data de Fim</label>
-                  <input 
-                    type="date" 
-                    class="form-control" 
-                    id="dataFim"
-                    v-model="cursoForm.dataFim"
-                  >
-                </div>
-                <div class="col-md-4 mb-3">
-                  <label for="status" class="form-label">Status *</label>
-                  <select 
-                    class="form-control" 
-                    id="status"
-                    v-model="cursoForm.status"
-                    required
-                  >
-                    <option value="ativo">Ativo</option>
-                    <option value="inativo">Inativo</option>
-                  </select>
                 </div>
               </div>
             </form>
@@ -259,8 +176,8 @@
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
               Cancelar
             </button>
-            <button type="button" class="btn btn-primary" @click="saveCurso">
-              {{ editingCurso ? 'Atualizar' : 'Salvar' }}
+            <button type="button" class="btn btn-primary" @click="saveCurso" :disabled="loading">
+              {{ loading ? 'Salvando...' : (editingCurso ? 'Atualizar' : 'Salvar') }}
             </button>
           </div>
         </div>
@@ -276,15 +193,15 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
-            <p>Tem certeza que deseja excluir o curso <strong>{{ cursoToDelete?.nome }}</strong>?</p>
+            <p>Tem certeza que deseja excluir o curso <strong>{{ cursoToDelete?.titulo }}</strong>?</p>
             <p class="text-danger">Esta ação não pode ser desfeita.</p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
               Cancelar
             </button>
-            <button type="button" class="btn btn-danger" @click="deleteCurso">
-              Excluir
+            <button type="button" class="btn btn-danger" @click="deleteCurso" :disabled="loading">
+              {{ loading ? 'Excluindo...' : 'Excluir' }}
             </button>
           </div>
         </div>
@@ -304,47 +221,42 @@ const { showModal, hideModal, createSimpleToast } = useBootstrap()
 const cursos = ref<Curso[]>([])
 const editingCurso = ref<Curso | null>(null)
 const cursoToDelete = ref<Curso | null>(null)
+const loading = ref(false)
 
 // Formulário reativo
 const cursoForm = ref({
-  nome: '',
+  titulo: '',
   descricao: '',
-  cargaHoraria: 0,
+  duracao: 0,
   instrutor: '',
-  categoria: '',
-  status: 'ativo' as 'ativo' | 'inativo',
-  dataInicio: '',
-  dataFim: ''
+  preco: 0
 })
 
-// Computed properties para estatísticas
-const cursosAtivos = computed(() => cursos.value.filter(c => c.status === 'ativo').length)
-const cursosInativos = computed(() => cursos.value.filter(c => c.status === 'inativo').length)
-const totalCategorias = computed(() => {
-  const categorias = new Set(cursos.value.map(c => c.categoria))
-  return categorias.size
+// Computed properties para estatísticas  
+const totalHoras = computed(() => {
+  return cursos.value.reduce((total, curso) => total + curso.duracao, 0)
 })
 
 // Métodos
-const loadCursos = () => {
+const loadCursos = async () => {
   try {
-    cursos.value = dataService.getCursos()
+    loading.value = true
+    cursos.value = await dataService.getCursos()
   } catch (error) {
     console.error('Erro ao carregar cursos:', error)
     createSimpleToast('Erro ao carregar cursos', 'danger')
+  } finally {
+    loading.value = false
   }
 }
 
 const resetForm = () => {
   cursoForm.value = {
-    nome: '',
+    titulo: '',
     descricao: '',
-    cargaHoraria: 0,
+    duracao: 0,
     instrutor: '',
-    categoria: '',
-    status: 'ativo',
-    dataInicio: '',
-    dataFim: ''
+    preco: 0
   }
 }
 
@@ -358,34 +270,30 @@ const showCursoModal = () => {
 const editCurso = (curso: Curso) => {
   editingCurso.value = curso
   cursoForm.value = {
-    nome: curso.nome,
+    titulo: curso.titulo,
     descricao: curso.descricao,
-    cargaHoraria: curso.cargaHoraria,
+    duracao: curso.duracao,
     instrutor: curso.instrutor,
-    categoria: curso.categoria,
-    status: curso.status,
-    dataInicio: curso.dataInicio || '',
-    dataFim: curso.dataFim || ''
+    preco: curso.preco
   }
   showCursoModal()
 }
 
-const saveCurso = () => {
+const saveCurso = async () => {
   try {
+    loading.value = true
+    
     if (editingCurso.value) {
       // Atualizar curso existente
-      const updated = dataService.updateCurso(editingCurso.value.id, {
-        nome: cursoForm.value.nome,
+      const success = await dataService.atualizarCurso(editingCurso.value.id, {
+        titulo: cursoForm.value.titulo,
         descricao: cursoForm.value.descricao,
-        cargaHoraria: cursoForm.value.cargaHoraria,
+        duracao: cursoForm.value.duracao,
         instrutor: cursoForm.value.instrutor,
-        categoria: cursoForm.value.categoria,
-        status: cursoForm.value.status,
-        dataInicio: cursoForm.value.dataInicio || undefined,
-        dataFim: cursoForm.value.dataFim || undefined
+        preco: cursoForm.value.preco
       })
       
-      if (updated) {
+      if (success) {
         createSimpleToast('Curso atualizado com sucesso!', 'success')
       } else {
         createSimpleToast('Erro ao atualizar curso', 'danger')
@@ -393,22 +301,19 @@ const saveCurso = () => {
       }
     } else {
       // Criar novo curso
-      const newCurso = dataService.addCurso({
-        nome: cursoForm.value.nome,
+      await dataService.criarCurso({
+        titulo: cursoForm.value.titulo,
         descricao: cursoForm.value.descricao,
-        cargaHoraria: cursoForm.value.cargaHoraria,
+        duracao: cursoForm.value.duracao,
         instrutor: cursoForm.value.instrutor,
-        categoria: cursoForm.value.categoria,
-        status: cursoForm.value.status,
-        dataInicio: cursoForm.value.dataInicio || undefined,
-        dataFim: cursoForm.value.dataFim || undefined
+        preco: cursoForm.value.preco
       })
       
       createSimpleToast('Curso criado com sucesso!', 'success')
     }
     
     // Recarregar dados e fechar modal
-    loadCursos()
+    await loadCursos()
     hideModal('cursoModal')
     resetForm()
     editingCurso.value = null
@@ -416,6 +321,8 @@ const saveCurso = () => {
   } catch (error) {
     console.error('Erro ao salvar curso:', error)
     createSimpleToast('Erro ao salvar curso', 'danger')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -424,15 +331,16 @@ const confirmDeleteCurso = (curso: Curso) => {
   showModal('deleteModal')
 }
 
-const deleteCurso = () => {
+const deleteCurso = async () => {
   if (!cursoToDelete.value) return
   
   try {
-    const success = dataService.deleteCurso(cursoToDelete.value.id)
+    loading.value = true
+    const success = await dataService.excluirCurso(cursoToDelete.value.id)
     
     if (success) {
       createSimpleToast('Curso excluído com sucesso!', 'success')
-      loadCursos()
+      await loadCursos()
     } else {
       createSimpleToast('Erro ao excluir curso', 'danger')
     }
@@ -443,6 +351,8 @@ const deleteCurso = () => {
   } catch (error) {
     console.error('Erro ao excluir curso:', error)
     createSimpleToast('Erro ao excluir curso', 'danger')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -491,5 +401,10 @@ onMounted(() => {
 
 .text-info {
   color: #36b9cc !important;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style> 

@@ -6,7 +6,8 @@ export interface AlunoDTO {
   ID: number
   Nome: string
   Email: string
-  Data_Cadastro: string
+  FotoUrl?: string      // Alinhado com backend
+  Data_Cadastro?: string // Pode vir undefined em algumas situações
 }
 
 export interface AlunoCreateDTO {
@@ -18,6 +19,12 @@ export interface AlunoCreateDTO {
 export interface AlunoLoginDTO {
   Email: string
   Senha: string
+}
+
+export interface AlunoUpdateDTO {
+  Nome?: string
+  Email?: string
+  Senha?: string
 }
 
 export interface CursoDTO {
@@ -154,6 +161,14 @@ class ApiService {
   async getAluno(id: number): Promise<AlunoDTO> {
     const response: AxiosResponse<AlunoDTO> = await this.api.get(API_ENDPOINTS.ALUNOS_BY_ID(id))
     return response.data
+  }
+
+  async updateAluno(id: number, aluno: AlunoUpdateDTO): Promise<void> {
+    await this.api.put(API_ENDPOINTS.ALUNOS_BY_ID(id), aluno)
+  }
+
+  async deleteAluno(id: number): Promise<void> {
+    await this.api.delete(API_ENDPOINTS.ALUNOS_BY_ID(id))
   }
 
   // === MATRÍCULAS ===

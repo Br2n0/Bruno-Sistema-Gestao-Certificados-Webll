@@ -27,7 +27,7 @@
           </div>
           
           <div class="card-body d-flex flex-column">
-            <h5 class="card-title fw-bold mb-3">{{ curso.nome }}</h5>
+                          <h5 class="card-title fw-bold mb-3">{{ curso.titulo }}</h5>
             <p class="card-text text-muted mb-4">
               {{ curso.descricao }}
             </p>
