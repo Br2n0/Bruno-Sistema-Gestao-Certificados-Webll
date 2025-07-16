@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
   // Matrículas
   MATRICULAS: '/Matriculas',
   MATRICULAS_BY_ID: (id: number) => `/Matriculas/${id}`,
+  MATRICULAS_CONCLUIR: (id: number) => `/Matriculas/${id}/concluir`,
   
   // Certificados
   CERTIFICADOS: '/Certificados',

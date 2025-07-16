@@ -288,27 +288,64 @@ const verificarMatricula = async () => {
   if (!currentUser.value?.id || !curso.value?.id) return
   
   try {
+    console.log('🔍 [MATRÍCULA] Verificando matrícula para:', {
+      alunoId: currentUser.value.id,
+      cursoId: curso.value.id
+    })
+    
     const matriculas = await apiService.getMatriculas()
     const matriculaEncontrada = matriculas.find(m => 
       m.Aluno_ID === currentUser.value!.id && m.Curso_ID === curso.value!.id
     )
     
     if (matriculaEncontrada) {
+      console.log('✅ [MATRÍCULA] Matrícula encontrada:', matriculaEncontrada)
       matricula.value = matriculaEncontrada
       matriculado.value = true
       
       // Simular progresso baseado no status
-      if (matriculaEncontrada.Status === 1) { // Concluída
+      if (matriculaEncontrada.Status === StatusMatricula.Concluida) {
         progresso.value = 100
         certificadoGerado.value = true
+        console.log('🎓 [MATRÍCULA] Curso já concluído, certificado disponível')
       } else {
         progresso.value = 33 // Progresso padrão para matrícula ativa
+        console.log('📚 [MATRÍCULA] Curso em andamento, progresso:', progresso.value)
       }
       
       atualizarModulos()
+      
+      // Verificar se já existe certificado
+      await verificarCertificadoExistente()
+      
+    } else {
+      console.log('ℹ️ [MATRÍCULA] Usuário não matriculado neste curso')
     }
   } catch (err) {
-    console.error('Erro ao verificar matrícula:', err)
+    console.error('❌ [MATRÍCULA] Erro ao verificar matrícula:', err)
+  }
+}
+
+// Verificar se já existe certificado para esta matrícula
+const verificarCertificadoExistente = async () => {
+  if (!matricula.value) return
+  
+  try {
+    console.log('🔍 [CERTIFICADO] Verificando certificado existente para matrícula:', matricula.value.ID)
+    
+    const certificados = await apiService.getCertificados()
+    const certificadoExistente = certificados.find(c => 
+      c.Curso_ID === curso.value!.id && c.Aluno_ID === currentUser.value!.id
+    )
+    
+    if (certificadoExistente) {
+      console.log('✅ [CERTIFICADO] Certificado já existe:', certificadoExistente)
+      certificadoGerado.value = true
+    } else {
+      console.log('ℹ️ [CERTIFICADO] Nenhum certificado encontrado')
+    }
+  } catch (err) {
+    console.error('❌ [CERTIFICADO] Erro ao verificar certificado existente:', err)
   }
 }
 
@@ -370,13 +407,21 @@ const avancarProgresso = async () => {
     progresso.value = novoProgresso
     atualizarModulos()
     
-         // Se completou 100%, atualizar status da matrícula
-     // if (novoProgresso === 100 && matricula.value) {
-     //   await apiService.updateMatricula(matricula.value.ID, { Status: StatusMatricula.Concluida })
-     // }
+    // Se completou 100%, concluir a matrícula
+    if (novoProgresso === 100 && matricula.value) {
+      console.log('🎯 [PROGRESSO] Curso concluído, finalizando matrícula')
+      await apiService.concluirMatricula(matricula.value.ID)
+      console.log('✅ [PROGRESSO] Matrícula finalizada com sucesso')
+      
+      // ✅ ATUALIZAR: Status da matrícula no frontend
+      if (matricula.value) {
+        matricula.value.Status = StatusMatricula.Concluida
+        console.log('✅ [PROGRESSO] Status da matrícula atualizado no frontend')
+      }
+    }
     
   } catch (err) {
-    console.error('Erro ao atualizar progresso:', err)
+    console.error('❌ [PROGRESSO] Erro ao atualizar progresso:', err)
     error.value = 'Erro ao atualizar progresso'
   } finally {
     atualizandoProgresso.value = false
@@ -388,19 +433,44 @@ const finalizarCurso = async () => {
   try {
     finalizando.value = true
     
-    if (!currentUser.value?.id || !curso.value?.id) return
+    // Verificar se temos a matrícula
+    if (!matricula.value) {
+      throw new Error('Matrícula não encontrada. Inicie o curso primeiro.')
+    }
 
-    // Criar certificado
-    await apiService.createCertificado({
-      Curso_ID: curso.value.id,
-      Aluno_ID: currentUser.value.id
+    // Verificar se o progresso está completo
+    if (progresso.value < 100) {
+      throw new Error('Complete o curso antes de gerar o certificado.')
+    }
+
+    console.log('🔍 [CERTIFICADO] Gerando certificado para matrícula:', matricula.value.ID)
+
+    // Criar certificado usando o ID da matrícula
+    const certificado = await apiService.createCertificado({
+      Matricula_ID: matricula.value.ID
     })
+    
+    console.log('✅ [CERTIFICADO] Certificado gerado com sucesso:', certificado)
     
     certificadoGerado.value = true
     
+    // ✅ REMOVIDO: Não precisa concluir matrícula novamente
+    // A matrícula já foi concluída no avancarProgresso quando chegou a 100%
+    console.log('✅ [CERTIFICADO] Processo finalizado com sucesso')
+    
   } catch (err: any) {
-    console.error('Erro ao gerar certificado:', err)
-    error.value = 'Erro ao gerar certificado. Tente novamente.'
+    console.error('❌ [CERTIFICADO] Erro ao gerar certificado:', err)
+    
+    // Mensagem de erro mais específica
+    if (err.response?.status === 400) {
+      error.value = err.response.data || 'Dados inválidos para gerar certificado'
+    } else if (err.response?.status === 404) {
+      error.value = 'Matrícula não encontrada'
+    } else if (err.response?.status === 409) {
+      error.value = 'Certificado já foi gerado para este curso'
+    } else {
+      error.value = 'Erro ao gerar certificado. Tente novamente.'
+    }
   } finally {
     finalizando.value = false
   }

@@ -80,8 +80,7 @@ export interface CertificadoDTO {
 }
 
 export interface CertificadoCreateDTO {
-  Curso_ID: number
-  Aluno_ID: number
+  Matricula_ID: number
 }
 
 class ApiService {
@@ -189,6 +188,10 @@ class ApiService {
 
   async updateMatricula(id: number, update: MatriculaUpdateDTO): Promise<void> {
     await this.api.put(API_ENDPOINTS.MATRICULAS_BY_ID(id), update)
+  }
+
+  async concluirMatricula(id: number): Promise<void> {
+    await this.api.post(API_ENDPOINTS.MATRICULAS_CONCLUIR(id))
   }
 
   async deleteMatricula(id: number): Promise<void> {
